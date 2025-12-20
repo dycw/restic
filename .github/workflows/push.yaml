@@ -1,0 +1,32 @@
+jobs:
+  publish:
+    environment:
+      name: pypi
+    needs:
+      - tag
+    permissions:
+      id-write: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Install 'uv'
+        uses: astral-sh/setup-uv@7
+        with:
+          enable-cache: true
+      - name: Build Python package
+        run: uv build
+      - name: Upload distribution
+        run: uv publish --trusted-publishing always
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tag latest commit
+        uses: dycw/action-tag@latest
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+name: push
+"on":
+  push:
+    branches:
+      - master

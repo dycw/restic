@@ -1,0 +1,77 @@
+repos:
+  - hooks:
+      - args:
+          - --fix
+        id: ruff-check
+      - id: ruff-format
+    repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.10
+  - hooks:
+      - args:
+          - --upgrade
+        id: uv-lock
+    repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.9.18
+  - hooks:
+      - args:
+          - --option
+          - indent_tables=true
+          - --option
+          - indent_entries=true
+          - --option
+          - reorder_keys=true
+        id: taplo-format
+    repo: https://github.com/compwa/taplo-pre-commit
+    rev: v0.9.3
+  - hooks:
+      - args:
+          - --coverage
+          - --github--push--tag
+          - --package-name=dycw-template
+          - --pre-commit--prettier
+          - --pre-commit--ruff
+          - --pre-commit--taplo
+          - --pre-commit--uv
+          - --pyproject
+          - --pyright
+          - --pyright--include=src
+          - --pytest
+          - --pytest--test-paths=src/tests
+          - --python-package-name=template_python
+          - --readme
+          - --repo-name=template-python
+          - --ruff
+        id: nitpick
+    repo: https://github.com/dycw/pre-commit-hook-nitpick
+    rev: 0.4.8
+  - hooks:
+      - id: format-requirements
+      - id: replace-sequence-str
+    repo: https://github.com/dycw/pre-commit-hooks
+    rev: 0.13.26
+  - hooks:
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: destroyed-symlinks
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - args:
+          - --fix=lf
+        id: mixed-line-ending
+      - id: no-commit-to-branch
+      - args:
+          - --autofix
+        id: pretty-format-json
+      - id: trailing-whitespace
+    repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+  - hooks:
+      - entry: npx prettier --write
+        id: prettier
+        language: system
+        name: prettier
+        types_or:
+          - markdown
+          - yaml
+    repo: local
