@@ -8,11 +8,11 @@
 [project]
   authors = [{ email = "d.wan@icloud.com", name = "Derek Wan" }]
   dependencies = []
-  name = "dycw-template"
+  name = "dycw-restic"
   readme = "README.md"
   requires-python = ">= 3.14"
-  version = "0.1.0"
+  version = "0.1.1"
 
 [tool.uv.build-backend]
-  module-name = "template_python"
+  module-name = "restic"
   module-root = "src"
