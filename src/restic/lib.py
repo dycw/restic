@@ -35,14 +35,14 @@ def backup(
     repo: Repo,
     /,
     *,
-    chmod: bool = False,
-    chown: str | None = None,
+    chmod: bool = SETTINGS.chmod,
+    chown: str | None = SETTINGS.chown,
     password: PasswordLike = SETTINGS.password,
     dry_run: bool = SETTINGS.dry_run,
     exclude: list[str] | None = None,
     iexclude: list[str] | None = None,
     read_concurrency: int = SETTINGS.read_concurrency,
-    tag: list[str] | None = None,
+    tag_backup: list[str] | None = SETTINGS.tag_backup,
     run_forget: bool = SETTINGS.run_forget,
     keep_last: int | None = SETTINGS.keep_last,
     keep_hourly: int | None = SETTINGS.keep_hourly,
@@ -60,7 +60,7 @@ def backup(
     repack_cacheable_only: bool = SETTINGS.repack_cacheable_only,
     repack_small: bool = SETTINGS.repack_small,
     repack_uncompressed: bool = SETTINGS.repack_uncompressed,
-    forget_tag: list[str] | None = None,
+    tag_forget: list[str] | None = SETTINGS.tag_forget,
 ) -> None:
     LOGGER.info("Backing up '%s' to '%s'...", path, repo)
     if chmod:
@@ -77,7 +77,7 @@ def backup(
             exclude=exclude,
             iexclude=iexclude,
             read_concurrency=read_concurrency,
-            tag=tag,
+            tag=tag_backup,
         )
     except CalledProcessError as error:
         if search(
@@ -95,7 +95,7 @@ def backup(
                 exclude=exclude,
                 iexclude=iexclude,
                 read_concurrency=read_concurrency,
-                tag=tag,
+                tag=tag_backup,
             )
         else:
             raise
@@ -119,7 +119,7 @@ def backup(
             repack_cacheable_only=repack_cacheable_only,
             repack_small=repack_small,
             repack_uncompressed=repack_uncompressed,
-            tag=forget_tag,
+            tag=tag_forget,
         )
     LOGGER.info("Finished backing up '%s' to '%s'", path, repo)
 
@@ -134,7 +134,7 @@ def _backup_core(
     exclude: list[str] | None = None,
     iexclude: list[str] | None = None,
     read_concurrency: int = SETTINGS.read_concurrency,
-    tag: list[str] | None = None,
+    tag: list[str] | None = SETTINGS.tag_backup,
 ) -> None:
     with yield_repo_env(repo), yield_password(password=password):
         run(
@@ -179,7 +179,7 @@ def forget(
     repack_cacheable_only: bool = SETTINGS.repack_cacheable_only,
     repack_small: bool = SETTINGS.repack_small,
     repack_uncompressed: bool = SETTINGS.repack_uncompressed,
-    tag: list[str] | None = None,
+    tag: list[str] | None = SETTINGS.tag_forget,
 ) -> None:
     LOGGER.info("Forgetting snapshots in '%s'...", repo)
     with yield_repo_env(repo), yield_password(password=password):
@@ -220,7 +220,7 @@ def restore(
     exclude_i: list[str] | None = None,
     include: list[str] | None = None,
     include_i: list[str] | None = None,
-    tag: list[str] | None = None,
+    tag: list[str] | None = SETTINGS.tag_restore,
     snapshot: str = "latest",
 ) -> None:
     LOGGER.info("Restoring snapshot '%s' of '%s' to '%s'...", snapshot, repo, target)

@@ -12,8 +12,15 @@ class Settings:
         default=Secret("password"), help="Repository password"
     )
     # backup
+    chmod: bool = option(default=False, help="Change permissions of the directory/file")
+    chown: str | None = option(
+        default=None, help="Change ownership of the directory/file"
+    )
     read_concurrency: int = option(
         default=max(round(CPU_COUNT / 2), 2), help="Read `n` files concurrency"
+    )
+    tag_backup: list[str] = option(
+        factory=list, help="Add tags for the snapshot in the format `tag[,tag,...]`"
     )
     run_forget: bool = option(
         default=True, help="Automatically run the 'forget' command"
@@ -71,6 +78,14 @@ class Settings:
     )
     repack_uncompressed: bool = option(
         default=False, help="Repack all uncompressed data"
+    )
+    tag_forget: list[str] | None = option(
+        factory=list, help="Only consider snapshots including tag[,tag,...]"
+    )
+    # restore
+    tag_restore: list[str] | None = option(
+        factory=list,
+        help='Only consider snapshots including tag[,tag,...], when snapshot ID "latest" is given',
     )
 
 
