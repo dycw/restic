@@ -1,26 +1,85 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from itertools import chain
+from re import MULTILINE, search
+from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
-from utilities.os import temp_environ
+from utilities.subprocess import run
 
+from restic.logging import LOGGER
+from restic.repo import yield_repo_env
 from restic.settings import SETTINGS
+from restic.utilities import run_chmod, yield_password
 
 if TYPE_CHECKING:
-    from typed_settings import Secret
     from utilities.types import PathLike
+
+    from restic.repo import Repo
+    from restic.types import PasswordLike
 
 
 def backup(
     path: PathLike,
-    repo: str,
+    repo: Repo,
     /,
     *,
-    password: Secret[str] | PathLike = SETTINGS.password,
+    chmod: bool = False,
+    chown: str | None = None,
+    password: PasswordLike = SETTINGS.password,
+    dry_run: bool = False,
+    exclude: list[str] = (),
+    tags: list[str] = (),
 ) -> None:
-    with temp_environ(RESTIC_PASSWORD=1):
-        a
+    LOGGER.info("Backing up '%s' to '%s'...", path, repo)
+    if chmod:
+        run_chmod(path, "d", "u=rwx,g=rx,o=rx")
+        run_chmod(path, "f", "u=rw,g=r,o=r")
+    if chown is not None:
+        run("sudo", "chown", "-R", f"{chown}:{chown}", str(path))
+    try:
+        _backup_core(
+            path, repo, password=password, dry_run=dry_run, exclude=exclude, tags=tags
+        )
+    except CalledProcessError as error:
+        if search(
+            "Is there a repository at the following location?",
+            error.stderr,
+            flags=MULTILINE,
+        ):
+            LOGGER.info("Auto-initializing repo...")
+            _init(repo, password=password)
+            _backup_core(
+                path,
+                repo,
+                password=password,
+                dry_run=dry_run,
+                exclude=exclude,
+                tags=tags,
+            )
+        else:
+            raise
+
+
+def _backup_core(
+    path: PathLike,
+    repo: Repo,
+    /,
+    *,
+    password: PasswordLike = SETTINGS.password,
+    dry_run: bool = False,
+    exclude: list[str] = (),
+    tags: list[str] = (),
+) -> None:
+    with yield_repo_env(repo), yield_password(password=password):
+        run(
+            "restic",
+            "backup",
+            *(["--dry-run"] if dry_run else []),
+            *chain.from_iterable(["--exclude", e] for e in exclude),
+            *chain.from_iterable(["--tag", t] for t in tags),
+            str(path),
+        )
 
 
 __all__ = ["backup"]

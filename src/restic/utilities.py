@@ -2,23 +2,28 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from typed_settings import Secret
 from utilities.os import temp_environ
+from utilities.subprocess import run
 
 from restic.settings import SETTINGS
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+    from utilities.types import PathLike
+
     from restic.types import PasswordLike
 
 
+def run_chmod(path: PathLike, type_: Literal["f", "d"], mode: str, /) -> None:
+    run("sudo", "find", str(path), "-type", type_, "-exec", "chmod", mode, "{}", "+")
+
+
 @contextmanager
-def yield_restic_password(
-    *, password: PasswordLike = SETTINGS.password
-) -> Iterator[None]:
+def yield_password(*, password: PasswordLike = SETTINGS.password) -> Iterator[None]:
     match password:
         case Secret():
             with temp_environ(RESTIC_PASSWORD=password.get_secret_value()):
@@ -35,4 +40,4 @@ def yield_restic_password(
                     yield
 
 
-__all__ = ["yield_restic_password"]
+__all__ = ["run_chmod", "yield_password"]
