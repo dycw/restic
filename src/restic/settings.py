@@ -41,11 +41,15 @@ class Settings:
     chown: str | None = option(
         default=None, help="Change ownership of the directory/file"
     )
+    exclude_backup: list[str] | None = option(default=None, help="Exclude a pattern")
+    exclude_i_backup: list[str] | None = option(
+        default=None, help="Exclude a pattern but ignores the casing of filenames"
+    )
     read_concurrency: int = option(
         default=max(round(CPU_COUNT / 2), 2), help="Read `n` files concurrency"
     )
-    tag_backup: list[str] = option(
-        factory=list, help="Add tags for the snapshot in the format `tag[,tag,...]`"
+    tag_backup: list[str] | None = option(
+        default=None, help="Add tags for the snapshot in the format `tag[,tag,...]`"
     )
     run_forget: bool = option(
         default=True, help="Automatically run the 'forget' command"
@@ -105,11 +109,19 @@ class Settings:
         default=False, help="Repack all uncompressed data"
     )
     tag_forget: list[str] | None = option(
-        factory=list, help="Only consider snapshots including tag[,tag,...]"
+        default=None, help="Only consider snapshots including tag[,tag,...]"
     )
     # restore
+    exclude_restore: list[str] | None = option(default=None, help="Exclude a pattern")
+    exclude_i_restore: list[str] | None = option(
+        default=None, help="Exclude a pattern but ignores the casing of filenames"
+    )
+    include_restore: list[str] | None = option(default=None, help="Include a pattern")
+    include_i_restore: list[str] | None = option(
+        default=None, help="Include a pattern but ignores the casing of filenames"
+    )
     tag_restore: list[str] | None = option(
-        factory=list,
+        default=None,
         help='Only consider snapshots including tag[,tag,...], when snapshot ID "latest" is given',
     )
 
@@ -141,8 +153,8 @@ class BackupSettings:
     read_concurrency: int = option(
         default=SETTINGS.read_concurrency, help=_get_help(Settings.read_concurrency)
     )
-    tag_bacup: list[str] | None = option(
-        factory=list, help=_get_help(Settings.tag_backup)
+    tag_backup: list[str] | None = option(
+        default=None, help=_get_help(Settings.tag_backup)
     )
     run_forget: bool = option(
         default=SETTINGS.run_forget, help=_get_help(Settings.run_forget)
@@ -197,7 +209,7 @@ class BackupSettings:
         help=_get_help(Settings.repack_uncompressed),
     )
     tag_forget: list[str] | None = option(
-        factory=list, help=_get_help(Settings.tag_forget)
+        default=None, help=_get_help(Settings.tag_forget)
     )
     # z: bool = option(default=SETTINGS.z, help=_get_help(Settings.z))
 
