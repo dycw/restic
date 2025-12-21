@@ -3,13 +3,8 @@
     "-ra",
     "-vv",
     "--color=auto",
-    "--cov=template",
-    "--cov-config=.coveragerc.toml",
-    "--cov-report=html",
     "--durations=10",
     "--durations-min=10",
-    "--cov=template_python",
-    "--cov=restic",
   ]
   collect_imported_tests = false
   empty_parameter_set_mark = "fail_at_collect"
