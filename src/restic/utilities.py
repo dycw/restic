@@ -1,0 +1,73 @@
+from __future__ import annotations
+
+from contextlib import contextmanager
+from itertools import chain
+from pathlib import Path
+from typing import TYPE_CHECKING, Literal
+
+from typed_settings import Secret
+from utilities.os import temp_environ
+from utilities.subprocess import run
+
+from restic.settings import SETTINGS
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from utilities.types import PathLike
+
+    from restic.types import PasswordLike
+
+
+def expand_dry_run(*, dry_run: bool = False) -> list[str]:
+    return ["--dry-run"] if dry_run else []
+
+
+def expand_exclude(*, exclude: list[str] | None = None) -> list[str]:
+    return _expand_generic("exclude", arg=exclude)
+
+
+def expand_include(*, include: list[str] | None = None) -> list[str]:
+    return _expand_generic("include", arg=include)
+
+
+def expand_tag(*, tag: list[str] | None = None) -> list[str]:
+    return _expand_generic("tag", arg=tag)
+
+
+def run_chmod(path: PathLike, type_: Literal["f", "d"], mode: str, /) -> None:
+    run("sudo", "find", str(path), "-type", type_, "-exec", "chmod", mode, "{}", "+")
+
+
+@contextmanager
+def yield_password(*, password: PasswordLike = SETTINGS.password) -> Iterator[None]:
+    match password:
+        case Secret():
+            with temp_environ(RESTIC_PASSWORD=password.get_secret_value()):
+                yield
+        case Path():
+            with temp_environ(RESTIC_PASSWORD_FILE=str(password)):
+                yield
+        case str():
+            if Path(password).is_file():
+                with temp_environ(RESTIC_PASSWORD_FILE=password):
+                    yield
+            else:
+                with temp_environ(RESTIC_PASSWORD=password):
+                    yield
+
+
+def _expand_generic(flag: str, /, *, arg: list[str] | None = None) -> list[str]:
+    return (
+        [] if arg is None else list(chain.from_iterable([f"--{flag}", a] for a in arg))
+    )
+
+
+__all__ = [
+    "expand_dry_run",
+    "expand_exclude",
+    "expand_include",
+    "expand_tag",
+    "run_chmod",
+    "yield_password",
+]
