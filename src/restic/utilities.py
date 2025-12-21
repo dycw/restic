@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
-from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -13,12 +12,12 @@ from restic.settings import SETTINGS
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from utilities.types import PathLike
+    from restic.types import PasswordLike
 
 
 @contextmanager
 def yield_restic_password(
-    *, password: Secret[str] | PathLike = SETTINGS.password
+    *, password: PasswordLike = SETTINGS.password
 ) -> Iterator[None]:
     match password:
         case Secret():
