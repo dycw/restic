@@ -28,8 +28,8 @@ def backup(
     chown: str | None = None,
     password: PasswordLike = SETTINGS.password,
     dry_run: bool = False,
-    exclude: list[str] = (),
-    tags: list[str] = (),
+    exclude: list[str] | None = None,
+    tags: list[str] | None = None,
 ) -> None:
     LOGGER.info("Backing up '%s' to '%s'...", path, repo)
     if chmod:
@@ -48,7 +48,7 @@ def backup(
             flags=MULTILINE,
         ):
             LOGGER.info("Auto-initializing repo...")
-            _init(repo, password=password)
+            init(repo, password=password)
             _backup_core(
                 path,
                 repo,
@@ -59,6 +59,7 @@ def backup(
             )
         else:
             raise
+    LOGGER.info("Finished backing up '%s' to '%s'", path, repo)
 
 
 def _backup_core(
@@ -68,18 +69,29 @@ def _backup_core(
     *,
     password: PasswordLike = SETTINGS.password,
     dry_run: bool = False,
-    exclude: list[str] = (),
-    tags: list[str] = (),
+    exclude: list[str] | None = None,
+    tags: list[str] | None = None,
 ) -> None:
     with yield_repo_env(repo), yield_password(password=password):
         run(
             "restic",
             "backup",
             *(["--dry-run"] if dry_run else []),
-            *chain.from_iterable(["--exclude", e] for e in exclude),
-            *chain.from_iterable(["--tag", t] for t in tags),
+            *(
+                []
+                if exclude is None
+                else chain.from_iterable(["--exclude", e] for e in exclude)
+            ),
+            *([] if tags is None else chain.from_iterable(["--tag", t] for t in tags)),
             str(path),
         )
 
 
-__all__ = ["backup"]
+def init(repo: Repo, /, *, password: PasswordLike = SETTINGS.password) -> None:
+    LOGGER.info("Initializing '%s'", repo)
+    with yield_repo_env(repo), yield_password(password=password):
+        run("restic", "init")
+    LOGGER.info("Finished initializing '%s'", repo)
+
+
+__all__ = ["backup", "init"]
