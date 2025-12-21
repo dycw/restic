@@ -19,6 +19,46 @@ class Settings:
         default=True, help="Automatically run the 'forget' command"
     )
     # forget
+    keep_last: int | None = option(default=None, help="Keep the last n snapshots")
+    keep_hourly: int | None = option(
+        default=None, help="Keep the last n hourly snapshots"
+    )
+    keep_daily: int | None = option(
+        default=None, help="Keep the last n daily snapshots"
+    )
+    keep_weekly: int | None = option(
+        default=None, help="Keep the last n weekly snapshots"
+    )
+    keep_monthly: int | None = option(
+        default=None, help="Keep the last n monthly snapshots"
+    )
+    keep_yearly: int | None = option(
+        default=None, help="Keep the last n yearly snapshots"
+    )
+    keep_within: str | None = option(
+        default=None,
+        help="Keep snapshots that are newer than duration relative to the latest snapshot",
+    )
+    keep_within_hourly: str | None = option(
+        default=None,
+        help="Keep hourly snapshots that are newer than duration relative to the latest snapshot",
+    )
+    keep_within_daily: str | None = option(
+        default=None,
+        help="Keep daily snapshots that are newer than duration relative to the latest snapshot",
+    )
+    keep_within_weekly: str | None = option(
+        default=None,
+        help="Keep weekly snapshots that are newer than duration relative to the latest snapshot",
+    )
+    keep_within_monthly: str | None = option(
+        default=None,
+        help="Keep monthly snapshots that are newer than duration relative to the latest snapshot",
+    )
+    keep_within_yearly: str | None = option(
+        default=None,
+        help="Keep yearly snapshots that are newer than duration relative to the latest snapshot",
+    )
     prune: bool = option(
         default=True,
         help="Automatically run the 'prune' command if snapshots have been removed",
