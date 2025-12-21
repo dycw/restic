@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from template_python import __version__
+from restic import __version__
 
 
 class TestMain:
