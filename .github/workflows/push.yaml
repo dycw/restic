@@ -5,6 +5,7 @@ jobs:
     needs:
       - tag
     permissions:
+      id-token: write
       id-write: write
     runs-on: ubuntu-latest
     steps:
@@ -18,6 +19,10 @@ jobs:
         run: uv build
       - name: Upload distribution
         run: uv publish --trusted-publishing always
+      - name: Build and publish package
+        uses: dycw/action-publish@latest
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
   tag:
     runs-on: ubuntu-latest
     steps:

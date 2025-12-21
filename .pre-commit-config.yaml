@@ -26,6 +26,7 @@ repos:
   - hooks:
       - args:
           - --coverage
+          - --github--push--publish
           - --github--push--tag
           - --package-name=dycw-restic
           - --pre-commit--prettier
