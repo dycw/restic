@@ -214,14 +214,14 @@ def restore(
     /,
     *,
     password: PasswordLike = SETTINGS.password,
-    delete: bool = False,
+    delete: bool = SETTINGS.delete,
     dry_run: bool = SETTINGS.dry_run,
     exclude: list[str] | None = SETTINGS.exclude_restore,
     exclude_i: list[str] | None = SETTINGS.exclude_i_restore,
     include: list[str] | None = SETTINGS.include_restore,
     include_i: list[str] | None = SETTINGS.include_i_restore,
     tag: list[str] | None = SETTINGS.tag_restore,
-    snapshot: str = "latest",
+    snapshot: str = SETTINGS.snapshot,
 ) -> None:
     LOGGER.info("Restoring snapshot '%s' of '%s' to '%s'...", snapshot, repo, target)
     with yield_repo_env(repo), yield_password(password=password):

@@ -112,6 +112,10 @@ class Settings:
         default=None, help="Only consider snapshots including tag[,tag,...]"
     )
     # restore
+    delete: bool = option(
+        default=False,
+        help="Delete files from target directory if they do not exist in snapshot",
+    )
     exclude_restore: list[str] | None = option(default=None, help="Exclude a pattern")
     exclude_i_restore: list[str] | None = option(
         default=None, help="Exclude a pattern but ignores the casing of filenames"
@@ -124,6 +128,7 @@ class Settings:
         default=None,
         help='Only consider snapshots including tag[,tag,...], when snapshot ID "latest" is given',
     )
+    snapshot: str = option(default="latest", help="Snapshot ID to restore")
 
 
 SETTINGS = load_settings(Settings, LOADERS)
