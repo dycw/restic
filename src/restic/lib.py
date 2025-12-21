@@ -10,11 +10,14 @@ from restic.logging import LOGGER
 from restic.repo import yield_repo_env
 from restic.settings import SETTINGS
 from restic.utilities import (
+    expand_bool,
     expand_dry_run,
     expand_exclude,
     expand_exclude_i,
     expand_include,
     expand_include_i,
+    expand_keep,
+    expand_keep_within,
     expand_tag,
     run_chmod,
     yield_password,
@@ -35,11 +38,29 @@ def backup(
     chmod: bool = False,
     chown: str | None = None,
     password: PasswordLike = SETTINGS.password,
-    dry_run: bool = False,
+    dry_run: bool = SETTINGS.dry_run,
     exclude: list[str] | None = None,
     iexclude: list[str] | None = None,
     read_concurrency: int = SETTINGS.read_concurrency,
     tag: list[str] | None = None,
+    run_forget: bool = SETTINGS.run_forget,
+    keep_last: int | None = None,
+    keep_hourly: int | None = None,
+    keep_daily: int | None = None,
+    keep_weekly: int | None = None,
+    keep_monthly: int | None = None,
+    keep_yearly: int | None = None,
+    keep_within: str | None = None,
+    keep_within_hourly: str | None = None,
+    keep_within_daily: str | None = None,
+    keep_within_weekly: str | None = None,
+    keep_within_monthly: str | None = None,
+    keep_within_yearly: str | None = None,
+    prune: bool = SETTINGS.prune,
+    repack_cacheable_only: bool = SETTINGS.repack_cacheable_only,
+    repack_small: bool = SETTINGS.repack_small,
+    repack_uncompressed: bool = SETTINGS.repack_uncompressed,
+    forget_tag: list[str] | None = None,
 ) -> None:
     LOGGER.info("Backing up '%s' to '%s'...", path, repo)
     if chmod:
@@ -78,6 +99,28 @@ def backup(
             )
         else:
             raise
+    if run_forget:
+        forget(
+            repo,
+            password=password,
+            keep_last=keep_last,
+            keep_hourly=keep_hourly,
+            keep_daily=keep_daily,
+            keep_weekly=keep_weekly,
+            keep_monthly=keep_monthly,
+            keep_yearly=keep_yearly,
+            keep_within=keep_within,
+            keep_within_hourly=keep_within_hourly,
+            keep_within_daily=keep_within_daily,
+            keep_within_weekly=keep_within_weekly,
+            keep_within_monthly=keep_within_monthly,
+            keep_within_yearly=keep_within_yearly,
+            prune=prune,
+            repack_cacheable_only=repack_cacheable_only,
+            repack_small=repack_small,
+            repack_uncompressed=repack_uncompressed,
+            tag=forget_tag,
+        )
     LOGGER.info("Finished backing up '%s' to '%s'", path, repo)
 
 
@@ -87,7 +130,7 @@ def _backup_core(
     /,
     *,
     password: PasswordLike = SETTINGS.password,
-    dry_run: bool = False,
+    dry_run: bool = SETTINGS.dry_run,
     exclude: list[str] | None = None,
     iexclude: list[str] | None = None,
     read_concurrency: int = SETTINGS.read_concurrency,
@@ -114,6 +157,57 @@ def init(repo: Repo, /, *, password: PasswordLike = SETTINGS.password) -> None:
     LOGGER.info("Finished initializing '%s'", repo)
 
 
+def forget(
+    repo: Repo,
+    /,
+    *,
+    password: PasswordLike = SETTINGS.password,
+    dry_run: bool = SETTINGS.dry_run,
+    keep_last: int | None = None,
+    keep_hourly: int | None = None,
+    keep_daily: int | None = None,
+    keep_weekly: int | None = None,
+    keep_monthly: int | None = None,
+    keep_yearly: int | None = None,
+    keep_within: str | None = None,
+    keep_within_hourly: str | None = None,
+    keep_within_daily: str | None = None,
+    keep_within_weekly: str | None = None,
+    keep_within_monthly: str | None = None,
+    keep_within_yearly: str | None = None,
+    prune: bool = SETTINGS.prune,
+    repack_cacheable_only: bool = SETTINGS.repack_cacheable_only,
+    repack_small: bool = SETTINGS.repack_small,
+    repack_uncompressed: bool = SETTINGS.repack_uncompressed,
+    tag: list[str] | None = None,
+) -> None:
+    LOGGER.info("Forgetting snapshots in '%s'...", repo)
+    with yield_repo_env(repo), yield_password(password=password):
+        run(
+            "restic",
+            "forget",
+            *expand_dry_run(dry_run=dry_run),
+            *expand_keep("last", n=keep_last),
+            *expand_keep("hourly", n=keep_hourly),
+            *expand_keep("daily", n=keep_daily),
+            *expand_keep("weekly", n=keep_weekly),
+            *expand_keep("monthly", n=keep_monthly),
+            *expand_keep("yearly", n=keep_yearly),
+            *expand_keep_within("within", duration=keep_within),
+            *expand_keep_within("within-hourly", duration=keep_within_hourly),
+            *expand_keep_within("within-daily", duration=keep_within_daily),
+            *expand_keep_within("within-weekly", duration=keep_within_weekly),
+            *expand_keep_within("within-monthly", duration=keep_within_monthly),
+            *expand_keep_within("within-yearly", duration=keep_within_yearly),
+            *expand_bool("prune", bool_=prune),
+            *expand_bool("repack-cacheable-only", bool_=repack_cacheable_only),
+            *expand_bool("repack-small", bool_=repack_small),
+            *expand_bool("repack-uncompressed", bool_=repack_uncompressed),
+            *expand_tag(tag=tag),
+        )
+    LOGGER.info("Finished forgetting snapshots in '%s'", repo)
+
+
 def restore(
     repo: Repo,
     target: PathLike,
@@ -121,7 +215,7 @@ def restore(
     *,
     password: PasswordLike = SETTINGS.password,
     delete: bool = False,
-    dry_run: bool = False,
+    dry_run: bool = SETTINGS.dry_run,
     exclude: list[str] | None = None,
     exclude_i: list[str] | None = None,
     include: list[str] | None = None,
@@ -134,7 +228,7 @@ def restore(
         run(
             "restic",
             "restore",
-            *(["--delete"] if delete else []),
+            *expand_bool("delete", bool_=delete),
             *expand_dry_run(dry_run=dry_run),
             *expand_exclude(exclude=exclude),
             *expand_exclude_i(exclude_i=exclude_i),
@@ -151,4 +245,4 @@ def restore(
     )
 
 
-__all__ = ["backup", "init", "restore"]
+__all__ = ["backup", "forget", "init", "restore"]
