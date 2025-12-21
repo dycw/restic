@@ -29,7 +29,7 @@ class Settings:
     # global
     dry_run: bool = option(default=False, help="Just print what would have been done")
     password: Secret[str] = secret(
-        default=Secret("password"), help="Repository password"
+        default=Secret("password"), help="Repository password or password file"
     )
     # backblaze
     backblaze_key_id: Secret[str] | None = secret(default=None, help="Backblaze key ID")
@@ -165,7 +165,7 @@ class BackupSettings:
         default=SETTINGS.read_concurrency, help=_get_help(Settings.read_concurrency)
     )
     tag_backup: list[str] | None = option(
-        default=None, help=_get_help(Settings.tag_backup)
+        default=SETTINGS.tag_backup, help=_get_help(Settings.tag_backup)
     )
     run_forget: bool = option(
         default=SETTINGS.run_forget, help=_get_help(Settings.run_forget)
@@ -220,9 +220,101 @@ class BackupSettings:
         help=_get_help(Settings.repack_uncompressed),
     )
     tag_forget: list[str] | None = option(
-        default=None, help=_get_help(Settings.tag_forget)
+        default=SETTINGS.tag_forget, help=_get_help(Settings.tag_forget)
     )
-    # z: bool = option(default=SETTINGS.z, help=_get_help(Settings.z))
 
 
-__all__ = ["LOADERS", "SETTINGS", "BackupSettings", "InitSettings", "Settings"]
+@settings(kw_only=True)
+class ForgetSettings:
+    password: Secret[str] = secret(
+        default=SETTINGS.password, help=_get_help(Settings.password)
+    )
+    dry_run: bool = option(default=SETTINGS.dry_run, help=_get_help(Settings.dry_run))
+    keep_last: int | None = option(
+        default=SETTINGS.keep_last, help=_get_help(Settings.keep_last)
+    )
+    keep_hourly: int | None = option(
+        default=SETTINGS.keep_hourly, help=_get_help(Settings.keep_hourly)
+    )
+    keep_daily: int | None = option(
+        default=SETTINGS.keep_daily, help=_get_help(Settings.keep_daily)
+    )
+    keep_weekly: int | None = option(
+        default=SETTINGS.keep_weekly, help=_get_help(Settings.keep_weekly)
+    )
+    keep_monthly: int | None = option(
+        default=SETTINGS.keep_monthly, help=_get_help(Settings.keep_monthly)
+    )
+    keep_yearly: int | None = option(
+        default=SETTINGS.keep_yearly, help=_get_help(Settings.keep_yearly)
+    )
+    keep_within: str | None = option(
+        default=SETTINGS.keep_within, help=_get_help(Settings.keep_within)
+    )
+    keep_within_hourly: str | None = option(
+        default=SETTINGS.keep_within_hourly, help=_get_help(Settings.keep_within_hourly)
+    )
+    keep_within_daily: str | None = option(
+        default=SETTINGS.keep_within_daily, help=_get_help(Settings.keep_within_daily)
+    )
+    keep_within_weekly: str | None = option(
+        default=SETTINGS.keep_within_weekly, help=_get_help(Settings.keep_within_weekly)
+    )
+    keep_within_monthly: str | None = option(
+        default=SETTINGS.keep_within_monthly,
+        help=_get_help(Settings.keep_within_monthly),
+    )
+    keep_within_yearly: str | None = option(
+        default=SETTINGS.keep_within_yearly, help=_get_help(Settings.keep_within_yearly)
+    )
+    prune: bool = option(default=SETTINGS.prune, help=_get_help(Settings.prune))
+    repack_cacheable_only: bool = option(
+        default=SETTINGS.repack_cacheable_only,
+        help=_get_help(Settings.repack_cacheable_only),
+    )
+    repack_small: bool = option(
+        default=SETTINGS.repack_small, help=_get_help(Settings.repack_small)
+    )
+    repack_uncompressed: bool = option(
+        default=SETTINGS.repack_uncompressed,
+        help=_get_help(Settings.repack_uncompressed),
+    )
+    tag: list[str] | None = option(
+        default=SETTINGS.tag_forget, help=_get_help(Settings.tag_forget)
+    )
+
+
+@settings(kw_only=True)
+class RestoreSettings:
+    password: Secret[str] = secret(
+        default=SETTINGS.password, help=_get_help(Settings.password)
+    )
+    delete: bool = option(default=SETTINGS.delete, help=_get_help(Settings.delete))
+    dry_run: bool = option(default=SETTINGS.dry_run, help=_get_help(Settings.dry_run))
+    exclude: list[str] | None = option(
+        default=SETTINGS.exclude_restore, help=_get_help(Settings.exclude_restore)
+    )
+    exclude_i: list[str] | None = option(
+        default=SETTINGS.exclude_i_restore, help=_get_help(Settings.exclude_i_restore)
+    )
+    include: list[str] | None = option(
+        default=SETTINGS.include_restore, help=_get_help(Settings.include_restore)
+    )
+    include_i: list[str] | None = option(
+        default=SETTINGS.include_i_restore, help=_get_help(Settings.include_i_restore)
+    )
+    tag: list[str] | None = option(
+        default=SETTINGS.tag_restore, help=_get_help(Settings.tag_restore)
+    )
+    snapshot: str = option(default=SETTINGS.snapshot, help=_get_help(Settings.snapshot))
+
+
+__all__ = [
+    "LOADERS",
+    "SETTINGS",
+    "BackupSettings",
+    "ForgetSettings",
+    "InitSettings",
+    "RestoreSettings",
+    "Settings",
+]
