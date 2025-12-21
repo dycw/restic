@@ -19,20 +19,40 @@ if TYPE_CHECKING:
     from restic.types import PasswordLike
 
 
+def expand_bool(flag: str, /, *, bool_: bool = False) -> list[str]:
+    return [f"--{flag}"] if bool_ else []
+
+
 def expand_dry_run(*, dry_run: bool = False) -> list[str]:
-    return ["--dry-run"] if dry_run else []
+    return expand_bool("dry-run", bool_=dry_run)
 
 
 def expand_exclude(*, exclude: list[str] | None = None) -> list[str]:
-    return _expand_generic("exclude", arg=exclude)
+    return _expand_list("exclude", arg=exclude)
+
+
+def expand_exclude_i(*, exclude_i: list[str] | None = None) -> list[str]:
+    return _expand_list("iexclude", arg=exclude_i)
 
 
 def expand_include(*, include: list[str] | None = None) -> list[str]:
-    return _expand_generic("include", arg=include)
+    return _expand_list("include", arg=include)
+
+
+def expand_include_i(*, include_i: list[str] | None = None) -> list[str]:
+    return _expand_list("iinclude", arg=include_i)
+
+
+def expand_keep(freq: str, /, *, n: int | None = None) -> list[str]:
+    return [] if n is None else [f"--keep-{freq}", str(n)]
+
+
+def expand_keep_within(freq: str, /, *, duration: str | None = None) -> list[str]:
+    return [] if duration is None else [f"--keep-{freq}", duration]
 
 
 def expand_tag(*, tag: list[str] | None = None) -> list[str]:
-    return _expand_generic("tag", arg=tag)
+    return _expand_list("tag", arg=tag)
 
 
 def run_chmod(path: PathLike, type_: Literal["f", "d"], mode: str, /) -> None:
@@ -57,16 +77,21 @@ def yield_password(*, password: PasswordLike = SETTINGS.password) -> Iterator[No
                     yield
 
 
-def _expand_generic(flag: str, /, *, arg: list[str] | None = None) -> list[str]:
+def _expand_list(flag: str, /, *, arg: list[str] | None = None) -> list[str]:
     return (
         [] if arg is None else list(chain.from_iterable([f"--{flag}", a] for a in arg))
     )
 
 
 __all__ = [
+    "expand_bool",
     "expand_dry_run",
     "expand_exclude",
+    "expand_exclude_i",
     "expand_include",
+    "expand_include_i",
+    "expand_keep",
+    "expand_keep_within",
     "expand_tag",
     "run_chmod",
     "yield_password",

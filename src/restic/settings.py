@@ -6,11 +6,86 @@ from utilities.os import CPU_COUNT
 
 @settings(kw_only=True)
 class Settings:
+    # global
+    dry_run: bool = option(default=False, help="Just print what would have backup done")
     password: Secret[str] = secret(
         default=Secret("password"), help="Repository password"
     )
+    # backup
+    chmod: bool = option(default=False, help="Change permissions of the directory/file")
+    chown: str | None = option(
+        default=None, help="Change ownership of the directory/file"
+    )
     read_concurrency: int = option(
         default=max(round(CPU_COUNT / 2), 2), help="Read `n` files concurrency"
+    )
+    tag_backup: list[str] = option(
+        factory=list, help="Add tags for the snapshot in the format `tag[,tag,...]`"
+    )
+    run_forget: bool = option(
+        default=True, help="Automatically run the 'forget' command"
+    )
+    # forget
+    keep_last: int | None = option(default=None, help="Keep the last n snapshots")
+    keep_hourly: int | None = option(
+        default=None, help="Keep the last n hourly snapshots"
+    )
+    keep_daily: int | None = option(
+        default=None, help="Keep the last n daily snapshots"
+    )
+    keep_weekly: int | None = option(
+        default=None, help="Keep the last n weekly snapshots"
+    )
+    keep_monthly: int | None = option(
+        default=None, help="Keep the last n monthly snapshots"
+    )
+    keep_yearly: int | None = option(
+        default=None, help="Keep the last n yearly snapshots"
+    )
+    keep_within: str | None = option(
+        default=None,
+        help="Keep snapshots that are newer than duration relative to the latest snapshot",
+    )
+    keep_within_hourly: str | None = option(
+        default=None,
+        help="Keep hourly snapshots that are newer than duration relative to the latest snapshot",
+    )
+    keep_within_daily: str | None = option(
+        default=None,
+        help="Keep daily snapshots that are newer than duration relative to the latest snapshot",
+    )
+    keep_within_weekly: str | None = option(
+        default=None,
+        help="Keep weekly snapshots that are newer than duration relative to the latest snapshot",
+    )
+    keep_within_monthly: str | None = option(
+        default=None,
+        help="Keep monthly snapshots that are newer than duration relative to the latest snapshot",
+    )
+    keep_within_yearly: str | None = option(
+        default=None,
+        help="Keep yearly snapshots that are newer than duration relative to the latest snapshot",
+    )
+    prune: bool = option(
+        default=True,
+        help="Automatically run the 'prune' command if snapshots have been removed",
+    )
+    repack_cacheable_only: bool = option(
+        default=False, help="Only repack packs which are cacheable"
+    )
+    repack_small: bool = option(
+        default=True, help="Repack pack files below 80% of target pack size"
+    )
+    repack_uncompressed: bool = option(
+        default=False, help="Repack all uncompressed data"
+    )
+    tag_forget: list[str] | None = option(
+        factory=list, help="Only consider snapshots including tag[,tag,...]"
+    )
+    # restore
+    tag_restore: list[str] | None = option(
+        factory=list,
+        help='Only consider snapshots including tag[,tag,...], when snapshot ID "latest" is given',
     )
 
 
