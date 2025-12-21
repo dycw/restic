@@ -15,7 +15,7 @@
   name = "dycw-restic"
   readme = "README.md"
   requires-python = ">= 3.14"
-  version = "0.1.3"
+  version = "0.1.4"
 
 [tool]
   [tool.uv]
