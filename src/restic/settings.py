@@ -155,6 +155,12 @@ class BackupSettings:
         default=SETTINGS.password, help=_get_help(Settings.password)
     )
     dry_run: bool = option(default=SETTINGS.dry_run, help=_get_help(Settings.dry_run))
+    exclude: list[str] | None = option(
+        default=SETTINGS.exclude_backup, help=_get_help(Settings.exclude_backup)
+    )
+    exclude_i: list[str] | None = option(
+        default=SETTINGS.exclude_i_backup, help=_get_help(Settings.exclude_i_backup)
+    )
     read_concurrency: int = option(
         default=SETTINGS.read_concurrency, help=_get_help(Settings.read_concurrency)
     )

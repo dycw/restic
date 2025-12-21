@@ -40,12 +40,7 @@ def init_sub_cmd(settings: InitSettings, /, *, repo: restic.repo.Repo) -> None:
 @argument("repo", type=restic.click.Repo())
 @click_options(BackupSettings, LOADERS, show_envvars_in_help=True)
 def backup_sub_cmd(
-    settings: BackupSettings,
-    /,
-    *,
-    path: PathLike,
-    repo: restic.repo.Repo,
-    password: SecretLike,
+    settings: BackupSettings, /, *, path: PathLike, repo: restic.repo.Repo
 ) -> None:
     if is_pytest():
         return
@@ -54,10 +49,10 @@ def backup_sub_cmd(
         repo,
         chmod=settings.chmod,
         chown=settings.chown,
-        password=password,
+        password=settings.password,
         dry_run=settings.dry_run,
-        exclude=exclude,
-        iexclude=iexclude,
+        exclude=settings.exclude,
+        exclude_i=settings.exclude_i,
         read_concurrency=settings.read_concurrency,
         tag_backup=settings.tag_backup,
         run_forget=settings.run_forget,
