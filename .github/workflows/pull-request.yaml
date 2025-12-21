@@ -1,8 +1,3 @@
-name: pull-request
-true:
-  pull_request:
-    branches:
-      - master
 jobs:
   pyright:
     name: pyright
@@ -48,3 +43,8 @@ jobs:
           - macos-latest
           - ubuntu-latest
     timeout-minutes: 60
+name: pull-request
+"on":
+  pull_request:
+    branches:
+      - master
