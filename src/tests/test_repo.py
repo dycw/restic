@@ -28,7 +28,11 @@ class TestBackblaze:
             BACKBLAZE_KEY_ID=key_id, BACKBLAZE_APPLICATION_KEY=application_key
         ):
             parsed = Backblaze.parse(backblaze.repository)
-        assert parsed == backblaze
+        assert parsed.key_id.get_secret_value() == backblaze.key_id.get_secret_value()
+        assert (
+            parsed.application_key.get_secret_value()
+            == backblaze.application_key.get_secret_value()
+        )
 
 
 class TestSFTP:
