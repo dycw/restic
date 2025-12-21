@@ -6,7 +6,6 @@ jobs:
       - tag
     permissions:
       id-token: write
-      id-write: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
