@@ -138,7 +138,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.3.1,<9" },
-    { name = "dycw-utilities", specifier = ">=0.171.1,<1" },
+    { name = "dycw-utilities", specifier = ">=0.172.1,<1" },
     { name = "typed-settings", specifier = ">=25.3.0,<26" },
 ]
 
