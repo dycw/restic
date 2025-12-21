@@ -1,14 +1,24 @@
 from __future__ import annotations
 
-from click import argument, group
+from inspect import getattr_static
+from operator import ge
+from typing import TYPE_CHECKING
+
+from attrs import fields_dict
+from click import argument, group, option
 from rich.pretty import pretty_repr
 from typed_settings import EnvLoader, click_options
 from utilities.click import CONTEXT_SETTINGS
 from utilities.logging import basic_config
 
-from restic.lib import init, restic
+import restic.click
+import restic.repo
+from restic.lib import init
 from restic.logging import LOGGER
-from restic.settings import Settings
+from restic.settings import SETTINGS, Settings
+
+if TYPE_CHECKING:
+    from restic.types import SecretLike
 
 
 @group(**CONTEXT_SETTINGS)
@@ -16,29 +26,15 @@ def _main() -> None: ...
 
 
 @_main.command(name="init", **CONTEXT_SETTINGS)
-@argument("repo", type=str)
-def init_sub_cmd() -> None:
-    init()
-
-
-@group(**CONTEXT_SETTINGS)
-@click_options(Settings, [EnvLoader("")], show_envvars_in_help=True)
-def _main(settings: Settings, /) -> None:
-    LOGGER.info("Settings = %s", pretty_repr(settings))
-    if settings.dry_run:
-        LOGGER.info("Dry-run; exiting...")
-        return
-    restic(
-        name=settings.name,
-        prepend_path=settings.prepend_path,
-        schedule=settings.schedule,
-        user=settings.user,
-        timeout=settings.timeout,
-        kill_after=settings.kill_after,
-        path_script=settings.path_script,
-        script_args=settings.script_args,
-        logs_keep=settings.logs_keep,
-    )
+@argument("repo", type=restic.click.Repo())
+@option(
+    "--password",
+    type=str,
+    default=SETTINGS.password,
+    help=Settings.get_help(Settings.password),
+)
+def init_sub_cmd(*, repo: restic.repo.Repo, password: SecretLike) -> None:
+    init(repo, password=password)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from typing import Any
+
+from attrs import fields_dict
 from typed_settings import (
     EnvLoader,
     FileLoader,
@@ -109,6 +112,12 @@ class Settings:
         factory=list,
         help='Only consider snapshots including tag[,tag,...], when snapshot ID "latest" is given',
     )
+
+    @classmethod
+    def get_help(cls, member_descriptor: Any, /) -> None:
+        return fields_dict(cls)[member_descriptor.__name__].metadata["typed-settings"][
+            "help"
+        ]
 
 
 SETTINGS = load_settings(Settings, LOADERS)

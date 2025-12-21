@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import suppress
+from re import search
 from typing import TYPE_CHECKING, assert_never, override
 
 from click import Context, Parameter, ParamType
@@ -31,7 +32,10 @@ class Repo(ParamType):
                     return Backblaze.parse(value)
                 with suppress(ExtractGroupsError):
                     return SFTP.parse(value)
-                return self.fail(f"Unable to parse {value!r}", param, ctx)
+                message = repr(value)
+                if search("b2", value):
+                    message = f"{message}. For a 'b2' backend, the environment varaibles 'BACKBLAZE_KEY_ID' and 'BACKBLAZE_APPLICATION_KEY' must be defined"
+                return self.fail(message, param, ctx)
             case never:
                 assert_never(never)
 
