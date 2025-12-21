@@ -59,7 +59,7 @@ def backup_sub_cmd(
         exclude=exclude,
         iexclude=iexclude,
         read_concurrency=settings.read_concurrency,
-        tag_backup=settings.tag_backup,
+        tag_backup=settings.tag_bacup,
         run_forget=settings.run_forget,
         keep_last=settings.keep_last,
         keep_hourly=settings.keep_hourly,

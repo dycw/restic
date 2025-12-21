@@ -141,7 +141,9 @@ class BackupSettings:
     read_concurrency: int = option(
         default=SETTINGS.read_concurrency, help=_get_help(Settings.read_concurrency)
     )
-    tag: list[str] = option(factory=list, help=_get_help(Settings.tag_backup))
+    tag_bacup: list[str] | None = option(
+        factory=list, help=_get_help(Settings.tag_backup)
+    )
     run_forget: bool = option(
         default=SETTINGS.run_forget, help=_get_help(Settings.run_forget)
     )
@@ -166,30 +168,37 @@ class BackupSettings:
     keep_within: str | None = option(
         default=SETTINGS.keep_within, help=_get_help(Settings.keep_within)
     )
-    keep_within_z: str | None = option(
-        default=SETTINGS.keep_within_z, help=_get_help(Settings.keep_within_z)
+    keep_within_hourly: str | None = option(
+        default=SETTINGS.keep_within_hourly, help=_get_help(Settings.keep_within_hourly)
     )
-    keep_within_z: str | None = option(
-        default=SETTINGS.keep_within_z, help=_get_help(Settings.keep_within_z)
+    keep_within_daily: str | None = option(
+        default=SETTINGS.keep_within_daily, help=_get_help(Settings.keep_within_daily)
     )
-    keep_within_z: str | None = option(
-        default=SETTINGS.keep_within_z, help=_get_help(Settings.keep_within_z)
+    keep_within_weekly: str | None = option(
+        default=SETTINGS.keep_within_weekly, help=_get_help(Settings.keep_within_weekly)
     )
-    keep_within_z: str | None = option(
-        default=SETTINGS.keep_within_z, help=_get_help(Settings.keep_within_z)
+    keep_within_monthly: str | None = option(
+        default=SETTINGS.keep_within_monthly,
+        help=_get_help(Settings.keep_within_monthly),
     )
-    keep_within_z: str | None = option(
-        default=SETTINGS.keep_within_z, help=_get_help(Settings.keep_within_z)
+    keep_within_yearly: str | None = option(
+        default=SETTINGS.keep_within_yearly, help=_get_help(Settings.keep_within_yearly)
     )
-    keep_within_z: str | None = option(
-        default=SETTINGS.keep_within_z, help=_get_help(Settings.keep_within_z)
+    prune: bool = option(default=SETTINGS.prune, help=_get_help(Settings.prune))
+    repack_cacheable_only: bool = option(
+        default=SETTINGS.repack_cacheable_only,
+        help=_get_help(Settings.repack_cacheable_only),
     )
-    z: bool = option(default=SETTINGS.z, help=_get_help(Settings.z))
-    z: bool = option(default=SETTINGS.z, help=_get_help(Settings.z))
-    z: bool = option(default=SETTINGS.z, help=_get_help(Settings.z))
-    z: bool = option(default=SETTINGS.z, help=_get_help(Settings.z))
-    z: bool = option(default=SETTINGS.z, help=_get_help(Settings.z))
-    z: bool = option(default=SETTINGS.z, help=_get_help(Settings.z))
+    repack_small: bool = option(
+        default=SETTINGS.repack_small, help=_get_help(Settings.repack_small)
+    )
+    repack_uncompressed: bool = option(
+        default=SETTINGS.repack_uncompressed,
+        help=_get_help(Settings.repack_uncompressed),
+    )
+    tag_forget: list[str] | None = option(
+        factory=list, help=_get_help(Settings.tag_forget)
+    )
     # z: bool = option(default=SETTINGS.z, help=_get_help(Settings.z))
 
 
