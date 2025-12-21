@@ -25,6 +25,7 @@ repos:
     rev: v0.9.3
   - hooks:
       - args:
+          - --description=Library to operate `restic`
           - --github--push--publish
           - --github--push--tag
           - --package-name=dycw-restic
