@@ -8,15 +8,15 @@
 [project]
   authors = [{ email = "d.wan@icloud.com", name = "Derek Wan" }]
   dependencies = [
-    "click >=8.3.1, <8.4",
-    "dycw-utilities >=0.171.1, <0.172",
-    "typed-settings >=25.3.0, <25.4",
+    "click >=8.3.1, <9",
+    "dycw-utilities >=0.171.1, <1",
+    "typed-settings >=25.3.0, <26",
   ]
   description = "Library to operate `restic`"
   name = "dycw-restic"
   readme = "README.md"
   requires-python = ">= 3.14"
-  version = "0.2.3"
+  version = "0.2.4"
 
   [project.scripts]
     py-restic = "restic.cli:_main"
