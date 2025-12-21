@@ -27,8 +27,16 @@ def expand_exclude(*, exclude: list[str] | None = None) -> list[str]:
     return _expand_generic("exclude", arg=exclude)
 
 
+def expand_exclude_i(*, exclude_i: list[str] | None = None) -> list[str]:
+    return _expand_generic("iexclude", arg=exclude_i)
+
+
 def expand_include(*, include: list[str] | None = None) -> list[str]:
     return _expand_generic("include", arg=include)
+
+
+def expand_include_i(*, include_i: list[str] | None = None) -> list[str]:
+    return _expand_generic("iinclude", arg=include_i)
 
 
 def expand_tag(*, tag: list[str] | None = None) -> list[str]:
@@ -66,7 +74,9 @@ def _expand_generic(flag: str, /, *, arg: list[str] | None = None) -> list[str]:
 __all__ = [
     "expand_dry_run",
     "expand_exclude",
+    "expand_exclude_i",
     "expand_include",
+    "expand_include_i",
     "expand_tag",
     "run_chmod",
     "yield_password",
