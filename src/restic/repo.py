@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, assert_never
+from pathlib import Path
+from typing import TYPE_CHECKING, Self, assert_never
 
 from utilities.os import temp_environ
+from utilities.re import extract_groups
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -32,7 +34,14 @@ class Backblaze:
 class SFTP:
     user: str
     hostname: str
-    path: PathLike
+    path: Path
+
+    @classmethod
+    def parse(cls, text: str, /) -> Self:
+        user, hostname, path = extract_groups(
+            r"^sftp:([A-Za-z0-9]+)@([A-Za-z0-9]+):([A-Za-z0-9/]+)$", text
+        )
+        return cls(user, hostname, Path(path))
 
     @property
     def repository(self) -> str:

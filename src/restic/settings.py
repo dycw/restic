@@ -1,7 +1,24 @@
 from __future__ import annotations
 
-from typed_settings import EnvLoader, Secret, load_settings, option, secret, settings
+from typed_settings import (
+    EnvLoader,
+    FileLoader,
+    Secret,
+    TomlFormat,
+    find,
+    load_settings,
+    option,
+    secret,
+    settings,
+)
 from utilities.os import CPU_COUNT
+
+LOADERS = [
+    FileLoader(
+        {"*.toml": TomlFormat(None)}, [find("config.toml"), find("secrets.toml")]
+    ),
+    EnvLoader(""),
+]
 
 
 @settings(kw_only=True)
@@ -10,6 +27,11 @@ class Settings:
     dry_run: bool = option(default=False, help="Just print what would have backup done")
     password: Secret[str] = secret(
         default=Secret("password"), help="Repository password"
+    )
+    # backblaze
+    backblaze_key_id: Secret[str] | None = secret(default=None, help="Backblaze key ID")
+    backblaze_application_key: Secret[str] | None = secret(
+        default=None, help="Backblaze application key"
     )
     # backup
     chmod: bool = option(default=False, help="Change permissions of the directory/file")
@@ -89,7 +111,7 @@ class Settings:
     )
 
 
-SETTINGS = load_settings(Settings, [EnvLoader("")])
+SETTINGS = load_settings(Settings, LOADERS)
 
 
-__all__ = ["SETTINGS", "Settings"]
+__all__ = ["LOADERS", "SETTINGS", "Settings"]
