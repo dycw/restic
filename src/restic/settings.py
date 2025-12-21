@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import typed_settings
-from typed_settings import EnvLoader, Secret, load_settings, secret, settings
+from typed_settings import EnvLoader, Secret, load_settings, option, secret, settings
+from utilities.os import CPU_COUNT
 
 
 @settings(kw_only=True)
@@ -9,10 +9,9 @@ class Settings:
     password: Secret[str] = secret(
         default=Secret("password"), help="Repository password"
     )
-    backup: Backup
-    restic: Restic
-    truenas: TrueNAS
-    dry_run: bool = typed_settings.option(default=False, help="Dry run the CLI")
+    read_concurrency: int = option(
+        default=max(round(CPU_COUNT / 2), 2), help="Read `n` files concurrency"
+    )
 
 
 SETTINGS = load_settings(Settings, [EnvLoader("")])

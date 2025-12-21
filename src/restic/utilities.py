@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+from itertools import chain
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
@@ -16,6 +17,22 @@ if TYPE_CHECKING:
     from utilities.types import PathLike
 
     from restic.types import PasswordLike
+
+
+def expand_dry_run(*, dry_run: bool = False) -> list[str]:
+    return ["--dry-run"] if dry_run else []
+
+
+def expand_exclude(*, exclude: list[str] | None = None) -> list[str]:
+    return _expand_generic("exclude", arg=exclude)
+
+
+def expand_include(*, include: list[str] | None = None) -> list[str]:
+    return _expand_generic("include", arg=include)
+
+
+def expand_tag(*, tag: list[str] | None = None) -> list[str]:
+    return _expand_generic("tag", arg=tag)
 
 
 def run_chmod(path: PathLike, type_: Literal["f", "d"], mode: str, /) -> None:
@@ -40,4 +57,17 @@ def yield_password(*, password: PasswordLike = SETTINGS.password) -> Iterator[No
                     yield
 
 
-__all__ = ["run_chmod", "yield_password"]
+def _expand_generic(flag: str, /, *, arg: list[str] | None = None) -> list[str]:
+    return (
+        [] if arg is None else list(chain.from_iterable([f"--{flag}", a] for a in arg))
+    )
+
+
+__all__ = [
+    "expand_dry_run",
+    "expand_exclude",
+    "expand_include",
+    "expand_tag",
+    "run_chmod",
+    "yield_password",
+]

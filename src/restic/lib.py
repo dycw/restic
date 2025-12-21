@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from itertools import chain
 from re import MULTILINE, search
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
@@ -10,7 +9,14 @@ from utilities.subprocess import run
 from restic.logging import LOGGER
 from restic.repo import yield_repo_env
 from restic.settings import SETTINGS
-from restic.utilities import run_chmod, yield_password
+from restic.utilities import (
+    expand_dry_run,
+    expand_exclude,
+    expand_include,
+    expand_tag,
+    run_chmod,
+    yield_password,
+)
 
 if TYPE_CHECKING:
     from utilities.types import PathLike
@@ -29,7 +35,9 @@ def backup(
     password: PasswordLike = SETTINGS.password,
     dry_run: bool = False,
     exclude: list[str] | None = None,
-    tags: list[str] | None = None,
+    include: list[str] | None = None,
+    read_concurrency: int = SETTINGS.read_concurrency,
+    tag: list[str] | None = None,
 ) -> None:
     LOGGER.info("Backing up '%s' to '%s'...", path, repo)
     if chmod:
@@ -39,7 +47,14 @@ def backup(
         run("sudo", "chown", "-R", f"{chown}:{chown}", str(path))
     try:
         _backup_core(
-            path, repo, password=password, dry_run=dry_run, exclude=exclude, tags=tags
+            path,
+            repo,
+            password=password,
+            dry_run=dry_run,
+            exclude=exclude,
+            include=include,
+            read_concurrency=read_concurrency,
+            tag=tag,
         )
     except CalledProcessError as error:
         if search(
@@ -55,7 +70,9 @@ def backup(
                 password=password,
                 dry_run=dry_run,
                 exclude=exclude,
-                tags=tags,
+                include=include,
+                read_concurrency=read_concurrency,
+                tag=tag,
             )
         else:
             raise
@@ -70,19 +87,20 @@ def _backup_core(
     password: PasswordLike = SETTINGS.password,
     dry_run: bool = False,
     exclude: list[str] | None = None,
-    tags: list[str] | None = None,
+    include: list[str] | None = None,
+    read_concurrency: int = SETTINGS.read_concurrency,
+    tag: list[str] | None = None,
 ) -> None:
     with yield_repo_env(repo), yield_password(password=password):
         run(
             "restic",
             "backup",
-            *(["--dry-run"] if dry_run else []),
-            *(
-                []
-                if exclude is None
-                else chain.from_iterable(["--exclude", e] for e in exclude)
-            ),
-            *([] if tags is None else chain.from_iterable(["--tag", t] for t in tags)),
+            *expand_dry_run(dry_run=dry_run),
+            *expand_exclude(exclude=exclude),
+            *expand_include(include=include),
+            "--read-conconcurrency",
+            str(read_concurrency),
+            *expand_tag(tag=tag),
             str(path),
         )
 
@@ -94,4 +112,37 @@ def init(repo: Repo, /, *, password: PasswordLike = SETTINGS.password) -> None:
     LOGGER.info("Finished initializing '%s'", repo)
 
 
-__all__ = ["backup", "init"]
+def restore(
+    repo: Repo,
+    target: PathLike,
+    /,
+    *,
+    password: PasswordLike = SETTINGS.password,
+    delete: bool = False,
+    dry_run: bool = False,
+    exclude: list[str] | None = None,
+    include: list[str] | None = None,
+    tag: list[str] | None = None,
+    snapshot: str = "latest",
+) -> None:
+    LOGGER.info("Restoring snapshot '%s' of '%s' to '%s'...", snapshot, repo, target)
+    with yield_repo_env(repo), yield_password(password=password):
+        run(
+            "restic",
+            "restore",
+            *(["--delete"] if delete else []),
+            *expand_dry_run(dry_run=dry_run),
+            *expand_exclude(exclude=exclude),
+            *expand_include(include=include),
+            *expand_tag(tag=tag),
+            "--target",
+            str(target),
+            "--verify",
+            snapshot,
+        )
+    LOGGER.info(
+        "Finished restoring snapshot '%s' of '%s' to '%s'", snapshot, repo, target
+    )
+
+
+__all__ = ["backup", "init", "restore"]
