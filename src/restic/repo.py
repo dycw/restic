@@ -5,14 +5,18 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Self, assert_never
 
+from typed_settings import Secret, load, load_settings
 from utilities.os import temp_environ
 from utilities.re import extract_groups
+
+from restic.settings import LOADERS, SETTINGS, Settings
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from typed_settings import Secret
     from utilities.types import PathLike
+
+    from restic.types import SecretLike
 
 
 type Repo = Backblaze | SFTP | str
@@ -23,7 +27,44 @@ class Backblaze:
     key_id: Secret[str]
     application_key: Secret[str]
     bucket: str
-    path: PathLike
+    path: Path
+
+    @classmethod
+    def parse(
+        cls,
+        text: str,
+        /,
+        *,
+        key_id: SecretLike | None = SETTINGS.backblaze_key_id,
+        application_key: SecretLike | None = SETTINGS.backblaze_application_key,
+    ) -> Self:
+        settings = load_settings(Settings, LOADERS)
+        match key_id, settings.backblaze_key_id:
+            case Secret() as key_id_use, _:
+                ...
+            case str(), _:
+                key_id_use = Secret(key_id)
+            case None, Secret() as key_id_use:
+                ...
+            case None, None:
+                msg = "'BACKBLAZE_KEY_ID' is missing"
+                raise ValueError(msg)
+            case never:
+                assert_never(never)
+        match application_key, settings.backblaze_application_key:
+            case Secret() as application_key_use, _:
+                ...
+            case str(), _:
+                application_key_use = Secret(application_key)
+            case None, Secret() as application_key_use:
+                ...
+            case None, None:
+                msg = "'BACKBLAZE_APPLICATION_KEY' is missing"
+                raise ValueError(msg)
+            case never:
+                assert_never(never)
+        bucket, path = extract_groups(r"^b2:([^@:]+):([^@+]+)$", text)
+        return cls(key_id_use, application_key_use, bucket, Path(path))
 
     @property
     def repository(self) -> str:
@@ -39,7 +80,7 @@ class SFTP:
     @classmethod
     def parse(cls, text: str, /) -> Self:
         user, hostname, path = extract_groups(
-            r"^sftp:([A-Za-z0-9]+)@([A-Za-z0-9]+):([A-Za-z0-9/]+)$", text
+            r"^sftp:([^@:]+)@([^@:]+):([^@:]+)$", text
         )
         return cls(user, hostname, Path(path))
 
