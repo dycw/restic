@@ -33,6 +33,8 @@ class TestBackblaze:
             parsed.application_key.get_secret_value()
             == backblaze.application_key.get_secret_value()
         )
+        assert parsed.bucket == backblaze.bucket
+        assert parsed.path == backblaze.path
 
 
 class TestSFTP:

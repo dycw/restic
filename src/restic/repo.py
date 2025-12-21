@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Self, assert_never
 
-from typed_settings import Secret, load, load_settings
+from typed_settings import Secret, load_settings
 from utilities.os import temp_environ
 from utilities.re import extract_groups
 
@@ -13,8 +13,6 @@ from restic.settings import LOADERS, SETTINGS, Settings
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
-
-    from utilities.types import PathLike
 
     from restic.types import SecretLike
 

@@ -1,45 +1,14 @@
 from __future__ import annotations
 
-import enum
-import ipaddress
-import pathlib
-import uuid
-from enum import StrEnum
-from re import search
-from typing import TYPE_CHECKING, TypedDict, assert_never, override
+from contextlib import suppress
+from typing import TYPE_CHECKING, assert_never, override
 
-import whenever
-from click import Choice, Context, Parameter, ParamType
-from click.types import IntParamType, StringParamType
-from utilities.enum import EnsureEnumError, ensure_enum
-from utilities.functions import EnsureStrError, ensure_str, get_class, get_class_name
-from utilities.iterables import is_iterable_not_str, one_unique
-from utilities.parse import ParseObjectError, parse_object
-from utilities.re import extract_group
-from utilities.text import split_str
+from click import Context, Parameter, ParamType
+from utilities.re import ExtractGroupsError
 
 from restic.repo import SFTP, Backblaze
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
-
-    from utilities.types import (
-        DateDeltaLike,
-        DateLike,
-        DateTimeDeltaLike,
-        EnumLike,
-        IPv4AddressLike,
-        IPv6AddressLike,
-        MaybeStr,
-        MonthDayLike,
-        PathLike,
-        PlainDateTimeLike,
-        TimeDeltaLike,
-        TimeLike,
-        YearMonthLike,
-        ZonedDateTimeLike,
-    )
-
     import restic.repo
 
 
@@ -58,10 +27,13 @@ class Repo(ParamType):
             case Backblaze() | SFTP():
                 return value
             case str():
-                try:
-                    return whenever.DateDelta.parse_iso(value)
-                except ValueError as error:
-                    self.fail(str(error), param, ctx)
+                with suppress(ValueError, ExtractGroupsError):
+                    return Backblaze.parse(value)
+                with suppress(ExtractGroupsError):
+                    return SFTP.parse(value)
+                return self.fail(f"Unable to parse {value!r}", param, ctx)
             case never:
                 assert_never(never)
-        return None
+
+
+__all__ = ["Repo"]

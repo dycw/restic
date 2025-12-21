@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from click import argument, command, group
+from click import argument, group
 from rich.pretty import pretty_repr
 from typed_settings import EnvLoader, click_options
 from utilities.click import CONTEXT_SETTINGS
