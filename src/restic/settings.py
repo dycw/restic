@@ -106,7 +106,7 @@ class Settings:
         default=True, help="Repack pack files below 80% of target pack size"
     )
     repack_uncompressed: bool = option(
-        default=False, help="Repack all uncompressed data"
+        default=True, help="Repack all uncompressed data"
     )
     tag_forget: list[str] | None = option(
         default=None, help="Only consider snapshots including tag[,tag,...]"
