@@ -12,11 +12,12 @@ from utilities.os import is_pytest
 
 import restic.click
 import restic.repo
-from restic.lib import backup, forget, init, restore, snapshots
+from restic.lib import backup, copy, forget, init, restore, snapshots
 from restic.logging import LOGGER
 from restic.settings import (
     LOADERS,
     BackupSettings,
+    CopySettings,
     ForgetSettings,
     InitSettings,
     RestoreSettings,
@@ -78,6 +79,24 @@ def backup_sub_cmd(
         repack_small=settings.repack_small,
         repack_uncompressed=settings.repack_uncompressed,
         tag_forget=settings.tag_forget,
+    )
+
+
+@_main.command(name="copy", **CONTEXT_SETTINGS)
+@argument("src", type=restic.click.Repo())
+@argument("dest", type=restic.click.Repo())
+@click_options(CopySettings, LOADERS, show_envvars_in_help=True)
+def copy_sub_cmd(
+    settings: CopySettings, /, *, src: restic.repo.Repo, dest: restic.repo.Repo
+) -> None:
+    if is_pytest():
+        return
+    copy(
+        src,
+        dest,
+        src_password=settings.src_password,
+        dest_password=settings.dest_password,
+        tag=settings.tag,
     )
 
 
