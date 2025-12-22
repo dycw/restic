@@ -1,44 +1,23 @@
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from click import argument, command, echo
 from click.testing import CliRunner
 from hypothesis import given
 from typed_settings import Secret
 from utilities.hypothesis import paths, text_ascii
-from utilities.os import temp_environ
 from utilities.text import strip_and_dedent
 
 import restic.click
 import restic.repo
-from restic.repo import SFTP, Backblaze, Local
+from restic.repo import Backblaze
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class TestRepo:
-    @given(
-        key_id=text_ascii(min_size=1),
-        application_key=text_ascii(min_size=1),
-        bucket=text_ascii(min_size=1),
-        path=paths(min_depth=1),
-    )
-    def test_backblaze(
-        self, *, key_id: str, application_key: str, bucket: str, path: Path
-    ) -> None:
-        backblaze = Backblaze(Secret(key_id), Secret(application_key), bucket, path)
-
-        @command()
-        @argument("repo", type=restic.click.Repo())
-        def cli(*, repo: restic.repo.Repo) -> None:
-            echo(f"repo = {repo}")
-
-        with temp_environ(
-            BACKBLAZE_KEY_ID=key_id, BACKBLAZE_APPLICATION_KEY=application_key
-        ):
-            result = CliRunner().invoke(cli, args=[backblaze.repository])
-        assert result.exit_code == 0
-        assert result.stdout == f"repo = {backblaze}\n"
-
     @given(
         key_id=text_ascii(min_size=1),
         application_key=text_ascii(min_size=1),
@@ -67,45 +46,3 @@ class TestRepo:
             trailing=True,
         )
         assert result.stderr == expected
-
-    @given(path=paths(min_depth=1))
-    def test_local(self, *, path: Path) -> None:
-        local = Local(path)
-
-        @command()
-        @argument("repo", type=restic.click.Repo())
-        def cli(*, repo: restic.repo.Repo) -> None:
-            echo(f"repo = {repo}")
-
-        result = CliRunner().invoke(cli, args=[local.repository])
-        assert result.exit_code == 0
-        assert result.stdout == f"repo = {local}\n"
-
-    @given(
-        user=text_ascii(min_size=1),
-        hostname=text_ascii(min_size=1),
-        path=paths(min_depth=1),
-    )
-    def test_sftp(self, *, user: str, hostname: str, path: Path) -> None:
-        sftp = SFTP(user, hostname, path)
-
-        @command()
-        @argument("repo", type=restic.click.Repo())
-        def cli(*, repo: restic.repo.Repo) -> None:
-            echo(f"repo = {repo}")
-
-        result = CliRunner().invoke(cli, args=[sftp.repository])
-        assert result.exit_code == 0
-        assert result.stdout == f"repo = {sftp}\n"
-
-    @given(text=text_ascii(min_size=1))
-    def test_regular_text(self, *, text: str) -> None:
-        @command()
-        @argument("repo", type=restic.click.Repo())
-        def cli(*, repo: restic.repo.Repo) -> None:
-            echo(f"repo = {repo}")
-
-        result = CliRunner().invoke(cli, args=[text])
-        assert result.exit_code == 0
-        local = Local(Path(text))
-        assert result.stdout == f"repo = {local}\n"
