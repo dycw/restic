@@ -309,6 +309,13 @@ class RestoreSettings:
     snapshot: str = option(default=SETTINGS.snapshot, help=_get_help(Settings.snapshot))
 
 
+@settings(kw_only=True)
+class SnapshotsSettings:
+    password: Secret[str] = secret(
+        default=SETTINGS.password, help=_get_help(Settings.password)
+    )
+
+
 __all__ = [
     "LOADERS",
     "SETTINGS",
@@ -317,4 +324,5 @@ __all__ = [
     "InitSettings",
     "RestoreSettings",
     "Settings",
+    "SnapshotsSettings",
 ]

@@ -245,4 +245,11 @@ def restore(
     )
 
 
-__all__ = ["backup", "forget", "init", "restore"]
+def snapshots(repo: Repo, /, *, password: PasswordLike = SETTINGS.password) -> None:
+    LOGGER.info("Listing snapshots in '%s'...", repo)
+    with yield_repo_env(repo), yield_password(password=password):
+        run("restic", "snapshots")
+    LOGGER.info("Finished listing snapshots in '%s'", repo)
+
+
+__all__ = ["backup", "forget", "init", "restore", "snapshots"]
