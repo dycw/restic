@@ -7,7 +7,7 @@ from typed_settings import Secret
 from utilities.hypothesis import paths, text_ascii
 from utilities.os import temp_environ
 
-from restic.repo import SFTP, Backblaze
+from restic.repo import SFTP, Backblaze, Local
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -35,6 +35,13 @@ class TestBackblaze:
         )
         assert parsed.bucket == backblaze.bucket
         assert parsed.path == backblaze.path
+
+
+class TestLocal:
+    @given(path=paths(min_depth=1))
+    def test_main(self, *, path: Path) -> None:
+        local = Local(path)
+        assert Local.parse(local.repository) == local
 
 
 class TestSFTP:

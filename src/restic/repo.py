@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Self, assert_never
 
 from typed_settings import Secret, load_settings
 from utilities.os import temp_environ
-from utilities.re import extract_groups
+from utilities.re import extract_group, extract_groups
 from utilities.types import PathLike
 
 from restic.settings import LOADERS, SETTINGS, Settings
@@ -76,7 +76,8 @@ class Local:
 
     @classmethod
     def parse(cls, text: str, /) -> Self:
-        return cls(Path(text))
+        path = extract_group(r"^local:([^@:]+)$", text)
+        return cls(Path(path))
 
     @property
     def repository(self) -> str:

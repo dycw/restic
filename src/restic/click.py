@@ -36,6 +36,8 @@ class Repo(ParamType):
                         message = f"For a Backblaze repository {value!r}, the environment varaibles 'BACKBLAZE_KEY_ID' and 'BACKBLAZE_APPLICATION_KEY' must be defined"
                         return self.fail(message, param, ctx)
                 with suppress(ExtractGroupsError):
+                    return Local.parse(value)
+                with suppress(ExtractGroupsError):
                     return SFTP.parse(value)
                 return value
             case never:
