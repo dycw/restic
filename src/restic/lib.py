@@ -158,6 +158,43 @@ def init(repo: Repo, /, *, password: PasswordLike = SETTINGS.password) -> None:
     LOGGER.info("Finished initializing '%s'", repo)
 
 
+def copy(
+    src: Repo,
+    dest: Repo,
+    /,
+    *,
+    src_password: PasswordLike = SETTINGS.password,
+    dest_password: PasswordLike = SETTINGS.password,
+    tag: list[str] | None = SETTINGS.tag_copy,
+) -> None:
+    LOGGER.info("Copying snapshots from '%s' to '%s'...", src, dest)
+    with yield_repo_env(src), yield_password(password=dest_password):
+        run(
+            "restic",
+            "copy",
+            *expand_dry_run(dry_run=dry_run),
+            *expand_keep("last", n=keep_last),
+            *expand_keep("hourly", n=keep_hourly),
+            *expand_keep("daily", n=keep_daily),
+            *expand_keep("weekly", n=keep_weekly),
+            *expand_keep("monthly", n=keep_monthly),
+            *expand_keep("yearly", n=keep_yearly),
+            *expand_keep_within("within", duration=keep_within),
+            *expand_keep_within("within-hourly", duration=keep_within_hourly),
+            *expand_keep_within("within-daily", duration=keep_within_daily),
+            *expand_keep_within("within-weekly", duration=keep_within_weekly),
+            *expand_keep_within("within-monthly", duration=keep_within_monthly),
+            *expand_keep_within("within-yearly", duration=keep_within_yearly),
+            *expand_bool("prune", bool_=prune),
+            *expand_bool("repack-cacheable-only", bool_=repack_cacheable_only),
+            *expand_bool("repack-small", bool_=repack_small),
+            *expand_bool("repack-uncompressed", bool_=repack_uncompressed),
+            *expand_tag(tag=tag),
+            print=True,
+        )
+    LOGGER.info("Finished copying snapshots from '%s' to '%s'", src, dest)
+
+
 def forget(
     repo: Repo,
     /,
@@ -255,4 +292,4 @@ def snapshots(repo: Repo, /, *, password: PasswordLike = SETTINGS.password) -> N
     LOGGER.info("Finished listing snapshots in '%s'", repo)
 
 
-__all__ = ["backup", "forget", "init", "restore", "snapshots"]
+__all__ = ["backup", "copy", "forget", "init", "restore", "snapshots"]

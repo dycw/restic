@@ -3,7 +3,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from itertools import chain
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, assert_never
 
 from typed_settings import Secret
 from utilities.os import temp_environ
@@ -60,24 +60,33 @@ def run_chmod(path: PathLike, type_: Literal["f", "d"], mode: str, /) -> None:
 
 
 @contextmanager
-def yield_password(*, password: PasswordLike = SETTINGS.password) -> Iterator[None]:
+def yield_password(
+    *,
+    password: PasswordLike = SETTINGS.password,
+    password_env_var: str = "RESTIC_PASSWORD",  # noqa: S107
+    password_file_env_var: str = "RESTIC_PASSWORD_FILE",  # noqa: S107
+) -> Iterator[None]:
     match password:
         case Secret():
-            with yield_password(password=password.get_secret_value()):
-                yield
+            value = password.get_secret_value()
+        case Path() | str() as value:
+            ...
+        case never:
+            assert_never(never)
+    match value:
         case Path():
-            if password.is_file():
-                with temp_environ(RESTIC_PASSWORD_FILE=str(password)):
+            if value.is_file():
+                with temp_environ({password_file_env_var: str(value)}):
                     yield
             else:
-                msg = f"Password file not found: '{password!s}'"
+                msg = f"Password file not found: '{value!s}'"
                 raise FileNotFoundError(msg)
         case str():
-            if Path(password).is_file():
-                with temp_environ(RESTIC_PASSWORD_FILE=password):
+            if Path(value).is_file():
+                with temp_environ({password_file_env_var: value}):
                     yield
             else:
-                with temp_environ(RESTIC_PASSWORD=password):
+                with temp_environ({password_env_var: value}):
                     yield
 
 
