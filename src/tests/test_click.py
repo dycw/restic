@@ -12,7 +12,7 @@ from utilities.text import strip_and_dedent
 
 import restic.click
 import restic.repo
-from restic.repo import SFTP, Backblaze
+from restic.repo import SFTP, Backblaze, Local
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -70,6 +70,19 @@ class TestRepo:
             trailing=True,
         )
         assert result.stderr == expected
+
+    @given(path=paths(min_depth=1))
+    def test_local(self, *, path: Path) -> None:
+        local = Local(path)
+
+        @command()
+        @argument("repo", type=restic.click.Repo())
+        def cli(*, repo: restic.repo.Repo) -> None:
+            echo(f"repo = {repo}")
+
+        result = CliRunner().invoke(cli, args=[local.repository])
+        assert result.exit_code == 0
+        assert result.stdout == f"repo = {local}\n"
 
     @given(
         user=text_ascii(min_size=1),

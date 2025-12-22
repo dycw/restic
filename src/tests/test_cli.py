@@ -8,10 +8,11 @@ class TestCLI:
     @mark.parametrize(
         ("cmd", "args"),
         [
-            param("init", ["sftp:user@hostname:/tmp"]),
-            param("backup", ["path", "sftp:user@hostname:/tmp"]),
-            param("forget", ["sftp:user@hostname:/tmp"]),
-            param("restore", ["sftp:user@hostname:/tmp", "target"]),
+            param("init", ["local:/tmp"]),
+            param("backup", ["path", "local:/tmp"]),
+            param("copy", ["local:/tmp", "local:/tmp2"]),
+            param("forget", ["local:/tmp"]),
+            param("restore", ["local:/tmp", "target"]),
         ],
     )
     def test_main(self, *, cmd: str, args: list[str]) -> None:
