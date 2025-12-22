@@ -12,7 +12,7 @@ from utilities.os import is_pytest
 
 import restic.click
 import restic.repo
-from restic.lib import backup, forget, init, restore
+from restic.lib import backup, forget, init, restore, snapshots
 from restic.logging import LOGGER
 from restic.settings import (
     LOADERS,
@@ -20,6 +20,7 @@ from restic.settings import (
     ForgetSettings,
     InitSettings,
     RestoreSettings,
+    SnapshotsSettings,
 )
 
 if TYPE_CHECKING:
@@ -132,6 +133,17 @@ def restore_sub_cmd(
         tag=settings.tag,
         snapshot=settings.snapshot,
     )
+
+
+@_main.command(name="snapshots", **CONTEXT_SETTINGS)
+@argument("repo", type=restic.click.Repo())
+@click_options(SnapshotsSettings, LOADERS, show_envvars_in_help=True)
+def snapshots_sub_cmd(
+    settings: SnapshotsSettings, /, *, repo: restic.repo.Repo
+) -> None:
+    if is_pytest():
+        return
+    snapshots(repo, password=settings.password)
 
 
 if __name__ == "__main__":
