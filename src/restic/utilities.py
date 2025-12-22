@@ -63,11 +63,15 @@ def run_chmod(path: PathLike, type_: Literal["f", "d"], mode: str, /) -> None:
 def yield_password(*, password: PasswordLike = SETTINGS.password) -> Iterator[None]:
     match password:
         case Secret():
-            with temp_environ(RESTIC_PASSWORD=password.get_secret_value()):
+            with yield_password(password=password.get_secret_value()):
                 yield
         case Path():
-            with temp_environ(RESTIC_PASSWORD_FILE=str(password)):
-                yield
+            if password.is_file():
+                with temp_environ(RESTIC_PASSWORD_FILE=str(password)):
+                    yield
+            else:
+                msg = f"Password file not found: '{password!s}'"
+                raise FileNotFoundError(msg)
         case str():
             if Path(password).is_file():
                 with temp_environ(RESTIC_PASSWORD_FILE=password):
