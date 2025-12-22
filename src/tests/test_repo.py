@@ -8,7 +8,13 @@ from typed_settings import Secret
 from utilities.hypothesis import paths, text_ascii
 from utilities.os import temp_environ
 
-from restic.repo import SFTP, Backblaze, Local, parse_repo
+from restic.repo import (
+    SFTP,
+    Backblaze,
+    BackblazeMissingCredentialsError,
+    Local,
+    parse_repo,
+)
 
 
 class TestBackblaze:
@@ -66,7 +72,7 @@ class TestParseRepo:
     ) -> None:
         repo = Backblaze(Secret(key_id), Secret(application_key), bucket, path)
         with raises(
-            ValueError,
+            BackblazeMissingCredentialsError,
             match=f"For a Backblaze repository {repo.repository!r}, the environment varaibles 'BACKBLAZE_KEY_ID' and 'BACKBLAZE_APPLICATION_KEY' must be defined",
         ):
             _ = parse_repo(repo.repository)

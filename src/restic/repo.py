@@ -135,13 +135,16 @@ def parse_repo(text: str, /) -> Repo:
     except ValueError, ExtractGroupsError:
         if search("b2", text):
             msg = f"For a Backblaze repository {text!r}, the environment varaibles 'BACKBLAZE_KEY_ID' and 'BACKBLAZE_APPLICATION_KEY' must be defined"
-            raise ValueError(msg) from None
+            raise BackblazeMissingCredentialsError(msg) from None
     with suppress(ExtractGroupsError):
         return SFTP.parse(text)
     try:
         return Local.parse(text)
     except ExtractGroupError:
         return Local(Path(text))
+
+
+class BackblazeMissingCredentialsError(Exception): ...
 
 
 @contextmanager
@@ -163,4 +166,12 @@ def yield_repo_env(
             assert_never(never)
 
 
-__all__ = ["SFTP", "Backblaze", "Local", "Repo", "parse_repo", "yield_repo_env"]
+__all__ = [
+    "SFTP",
+    "Backblaze",
+    "BackblazeMissingCredentialsError",
+    "Local",
+    "Repo",
+    "parse_repo",
+    "yield_repo_env",
+]

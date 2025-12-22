@@ -1,14 +1,16 @@
 from __future__ import annotations
 
-from contextlib import suppress
-from pathlib import Path
-from re import search
 from typing import TYPE_CHECKING, assert_never, override
 
 from click import Context, Parameter, ParamType
-from utilities.re import ExtractGroupError, ExtractGroupsError
 
-from restic.repo import SFTP, Backblaze, Local
+from restic.repo import (
+    SFTP,
+    Backblaze,
+    BackblazeMissingCredentialsError,
+    Local,
+    parse_repo,
+)
 
 if TYPE_CHECKING:
     import restic.repo
@@ -33,17 +35,10 @@ class Repo(ParamType):
                 return value
             case str():
                 try:
-                    return Backblaze.parse(value)
-                except ValueError, ExtractGroupsError:
-                    if search("b2", value):
-                        message = f"For a Backblaze repository {value!r}, the environment varaibles 'BACKBLAZE_KEY_ID' and 'BACKBLAZE_APPLICATION_KEY' must be defined"
-                        return self.fail(message, param, ctx)
-                with suppress(ExtractGroupsError):
-                    return SFTP.parse(value)
-                try:
-                    return Local.parse(value)
-                except ExtractGroupError:
-                    return Local(Path(value))
+                    return parse_repo(value)
+                except BackblazeMissingCredentialsError as error:
+                    (msg,) = error.args
+                    return self.fail(msg, param, ctx)
             case never:
                 assert_never(never)
 
