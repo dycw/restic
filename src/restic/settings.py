@@ -54,6 +54,7 @@ class Settings:
     run_forget: bool = option(
         default=True, help="Automatically run the 'forget' command"
     )
+    sleep: int | None = option(default=None, help="Sleep after a successful backup")
     # copy
     tag_copy: list[str] | None = option(
         default=None, help="Only consider snapshots including `tag[,tag,...]`"
@@ -226,6 +227,7 @@ class BackupSettings:
     tag_forget: list[str] | None = option(
         default=SETTINGS.tag_forget, help=_get_help(Settings.tag_forget)
     )
+    sleep: int | None = option(default=SETTINGS.sleep, help=_get_help(Settings.sleep))
 
 
 @settings(kw_only=True)
