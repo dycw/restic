@@ -1,13 +1,19 @@
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Self, assert_never
+from re import search
+from typing import TYPE_CHECKING, Self, assert_never, override
 
 from typed_settings import Secret, load_settings
 from utilities.os import temp_environ
-from utilities.re import extract_group, extract_groups
+from utilities.re import (
+    ExtractGroupError,
+    ExtractGroupsError,
+    extract_group,
+    extract_groups,
+)
 
 from restic.settings import LOADERS, SETTINGS, Settings
 
@@ -20,12 +26,34 @@ if TYPE_CHECKING:
 type Repo = Backblaze | Local | SFTP
 
 
-@dataclass(order=True, unsafe_hash=True, slots=True)
+@dataclass(order=True, slots=True)
 class Backblaze:
     key_id: Secret[str]
     application_key: Secret[str]
     bucket: str
     path: Path
+
+    @override
+    def __eq__(self, other: object, /) -> bool:
+        return (
+            isinstance(other, type(self))
+            and (self.key_id.get_secret_value() == other.key_id.get_secret_value())
+            and (
+                self.application_key.get_secret_value()
+                == other.application_key.get_secret_value()
+            )
+            and (self.bucket == other.bucket)
+            and (self.path == other.path)
+        )
+
+    @override
+    def __hash__(self) -> int:
+        return hash((
+            self.key_id.get_secret_value(),
+            self.application_key.get_secret_value(),
+            self.bucket,
+            self.path,
+        ))
 
     @classmethod
     def parse(
@@ -101,6 +129,21 @@ class SFTP:
         return f"sftp:{self.user}@{self.hostname}:{self.path}"
 
 
+def parse_repo(text: str, /) -> Repo:
+    try:
+        return Backblaze.parse(text)
+    except ValueError, ExtractGroupsError:
+        if search("b2", text):
+            msg = f"For a Backblaze repository {text!r}, the environment varaibles 'BACKBLAZE_KEY_ID' and 'BACKBLAZE_APPLICATION_KEY' must be defined"
+            raise ValueError(msg) from None
+    with suppress(ExtractGroupsError):
+        return SFTP.parse(text)
+    try:
+        return Local.parse(text)
+    except ExtractGroupError:
+        return Local(Path(text))
+
+
 @contextmanager
 def yield_repo_env(
     repo: Repo, /, *, env_var: str = "RESTIC_REPOSITORY"
@@ -120,4 +163,4 @@ def yield_repo_env(
             assert_never(never)
 
 
-__all__ = ["SFTP", "Backblaze", "Local", "Repo", "yield_repo_env"]
+__all__ = ["SFTP", "Backblaze", "Local", "Repo", "parse_repo", "yield_repo_env"]
