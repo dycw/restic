@@ -28,7 +28,9 @@ LOADERS = [
 class Settings:
     # global
     dry_run: bool = option(default=False, help="Just print what would have been done")
-    password: Secret[str] = secret(help="Repository password or password file")
+    password: Secret[str] = secret(
+        default=Secret("password"), help="Repository password or password file"
+    )
     # backblaze
     backblaze_key_id: Secret[str] | None = secret(default=None, help="Backblaze key ID")
     backblaze_application_key: Secret[str] | None = secret(
