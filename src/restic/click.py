@@ -6,9 +6,9 @@ from re import search
 from typing import TYPE_CHECKING, assert_never, override
 
 from click import Context, Parameter, ParamType
-from utilities.re import ExtractGroupsError
+from utilities.re import ExtractGroupError, ExtractGroupsError
 
-from restic.repo import SFTP, Backblaze
+from restic.repo import SFTP, Backblaze, Local
 
 if TYPE_CHECKING:
     import restic.repo
@@ -26,7 +26,7 @@ class Repo(ParamType):
         self, value: restic.repo.Repo, param: Parameter | None, ctx: Context | None
     ) -> restic.repo.Repo:
         match value:
-            case Backblaze() | SFTP() | Path():
+            case Backblaze() | Local() | SFTP() | Path():
                 return value
             case str():
                 try:
@@ -37,7 +37,10 @@ class Repo(ParamType):
                         return self.fail(message, param, ctx)
                 with suppress(ExtractGroupsError):
                     return SFTP.parse(value)
-                return value
+                try:
+                    return Local.parse(value)
+                except ExtractGroupError:
+                    return Local(Path(value))
             case never:
                 assert_never(never)
 

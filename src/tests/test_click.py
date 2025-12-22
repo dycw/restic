@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 from click import argument, command, echo
 from click.testing import CliRunner
@@ -12,10 +12,7 @@ from utilities.text import strip_and_dedent
 
 import restic.click
 import restic.repo
-from restic.repo import SFTP, Backblaze
-
-if TYPE_CHECKING:
-    from pathlib import Path
+from restic.repo import SFTP, Backblaze, Local
 
 
 class TestRepo:
@@ -71,6 +68,19 @@ class TestRepo:
         )
         assert result.stderr == expected
 
+    @given(path=paths(min_depth=1))
+    def test_local(self, *, path: Path) -> None:
+        local = Local(path)
+
+        @command()
+        @argument("repo", type=restic.click.Repo())
+        def cli(*, repo: restic.repo.Repo) -> None:
+            echo(f"repo = {repo}")
+
+        result = CliRunner().invoke(cli, args=[local.repository])
+        assert result.exit_code == 0
+        assert result.stdout == f"repo = {local}\n"
+
     @given(
         user=text_ascii(min_size=1),
         hostname=text_ascii(min_size=1),
@@ -87,3 +97,15 @@ class TestRepo:
         result = CliRunner().invoke(cli, args=[sftp.repository])
         assert result.exit_code == 0
         assert result.stdout == f"repo = {sftp}\n"
+
+    @given(text=text_ascii(min_size=1))
+    def test_regular_text(self, *, text: str) -> None:
+        @command()
+        @argument("repo", type=restic.click.Repo())
+        def cli(*, repo: restic.repo.Repo) -> None:
+            echo(f"repo = {repo}")
+
+        result = CliRunner().invoke(cli, args=[text])
+        assert result.exit_code == 0
+        local = Local(Path(text))
+        assert result.stdout == f"repo = {local}\n"

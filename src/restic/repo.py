@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Self, assert_never
 
 from typed_settings import Secret, load_settings
 from utilities.os import temp_environ
-from utilities.re import extract_groups
+from utilities.re import extract_group, extract_groups
 from utilities.types import PathLike
 
 from restic.settings import LOADERS, SETTINGS, Settings
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from restic.types import SecretLike
 
 
-type Repo = Backblaze | SFTP | PathLike
+type Repo = Backblaze | Local | SFTP | PathLike
 
 
 @dataclass(order=True, unsafe_hash=True, slots=True)
@@ -71,6 +71,20 @@ class Backblaze:
 
 
 @dataclass(order=True, unsafe_hash=True, slots=True)
+class Local:
+    path: Path
+
+    @classmethod
+    def parse(cls, text: str, /) -> Self:
+        path = extract_group(r"^local:([^@:]+)$", text)
+        return cls(Path(path))
+
+    @property
+    def repository(self) -> str:
+        return f"local:{self.path}"
+
+
+@dataclass(order=True, unsafe_hash=True, slots=True)
 class SFTP:
     user: str
     hostname: str
@@ -100,7 +114,7 @@ def yield_repo_env(
                 B2_ACCOUNT_KEY=repo.application_key.get_secret_value(),
             ):
                 yield
-        case SFTP():
+        case Local() | SFTP():
             with temp_environ({env_var: repo.repository}):
                 yield
         case Path() | str():
@@ -110,4 +124,4 @@ def yield_repo_env(
             assert_never(never)
 
 
-__all__ = ["SFTP", "Backblaze", "Repo", "yield_repo_env"]
+__all__ = ["SFTP", "Backblaze", "Local", "Repo", "yield_repo_env"]
