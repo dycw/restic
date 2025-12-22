@@ -19,6 +19,7 @@ class KeepKwargs(TypedDict):
 
 
 DEFAULT_KEEP_KWARGS = KeepKwargs(
+    keep_last=100,
     keep_hourly=24 * 7,
     keep_daily=30,
     keep_weekly=52,
