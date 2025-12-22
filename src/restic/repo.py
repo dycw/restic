@@ -9,6 +9,8 @@ from typed_settings import Secret, load_settings
 from utilities.os import temp_environ
 from utilities.re import extract_group, extract_groups
 
+from restic.settings import LOADERS, SETTINGS, Settings
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
@@ -31,11 +33,9 @@ class Backblaze:
         text: str,
         /,
         *,
-        key_id: SecretLike | None = None,
-        application_key: SecretLike | None = None,
+        key_id: SecretLike | None = SETTINGS.backblaze_key_id,
+        application_key: SecretLike | None = SETTINGS.backblaze_application_key,
     ) -> Self:
-        from restic.settings import LOADERS, Settings
-
         settings = load_settings(Settings, LOADERS)
         match key_id, settings.backblaze_key_id:
             case Secret() as key_id_use, _:
