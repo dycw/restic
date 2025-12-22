@@ -143,7 +143,7 @@ def _backup_core(
             *expand_dry_run(dry_run=dry_run),
             *expand_exclude(exclude=exclude),
             *expand_exclude_i(exclude_i=exclude_i),
-            "--read-conconcurrency",
+            "--read-concurrency",
             str(read_concurrency),
             *expand_tag(tag=tag),
             str(path),
