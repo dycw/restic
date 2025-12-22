@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from os import getenv
 from typing import Any
 
 from attrs import fields_dict
@@ -9,11 +10,19 @@ from typed_settings import (
     Secret,
     TomlFormat,
     find,
+    load_settings,
     option,
     secret,
     settings,
 )
 from utilities.os import CPU_COUNT
+
+CONFIG_FILE = getenv("RESTIC_CONFIG_FILE", "config.toml")
+SECRETS_FILE = getenv("RESTIC_SECRETS_FILE", "secrets.toml")
+LOADERS = [
+    FileLoader({"*.toml": TomlFormat(None)}, [find(CONFIG_FILE), find(SECRETS_FILE)]),
+    EnvLoader(""),
+]
 
 
 @settings(kw_only=True)
@@ -128,7 +137,7 @@ class Settings:
     snapshot: str = option(default="latest", help="Snapshot ID to restore")
 
 
-SETTINGS = Settings()
+SETTINGS = load_settings(Settings, LOADERS)
 
 
 def _get_help(member_descriptor: Any, /) -> None:
@@ -325,14 +334,6 @@ class SnapshotsSettings:
     password: Secret[str] = secret(
         default=SETTINGS.password, help=_get_help(Settings.password)
     )
-
-
-LOADERS = [
-    FileLoader(
-        {"*.toml": TomlFormat(None)}, [find("config.toml"), find("secrets.toml")]
-    ),
-    EnvLoader(""),
-]
 
 
 __all__ = [
