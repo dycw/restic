@@ -9,19 +9,11 @@ from typed_settings import (
     Secret,
     TomlFormat,
     find,
-    load_settings,
     option,
     secret,
     settings,
 )
 from utilities.os import CPU_COUNT
-
-LOADERS = [
-    FileLoader(
-        {"*.toml": TomlFormat(None)}, [find("config.toml"), find("secrets.toml")]
-    ),
-    EnvLoader(""),
-]
 
 
 @settings(kw_only=True)
@@ -136,7 +128,7 @@ class Settings:
     snapshot: str = option(default="latest", help="Snapshot ID to restore")
 
 
-SETTINGS = load_settings(Settings, LOADERS)
+SETTINGS = Settings()
 
 
 def _get_help(member_descriptor: Any, /) -> None:
@@ -333,6 +325,14 @@ class SnapshotsSettings:
     password: Secret[str] = secret(
         default=SETTINGS.password, help=_get_help(Settings.password)
     )
+
+
+LOADERS = [
+    FileLoader(
+        {"*.toml": TomlFormat(None)}, [find("config.toml"), find("secrets.toml")]
+    ),
+    EnvLoader(""),
+]
 
 
 __all__ = [
