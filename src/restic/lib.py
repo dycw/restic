@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import time
 from re import MULTILINE, search
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
 from utilities.subprocess import run
+from whenever import TimeDelta
 
 from restic.logging import LOGGER
 from restic.repo import yield_repo_env
@@ -61,6 +63,7 @@ def backup(
     repack_small: bool = SETTINGS.repack_small,
     repack_uncompressed: bool = SETTINGS.repack_uncompressed,
     tag_forget: list[str] | None = SETTINGS.tag_forget,
+    sleep: int | None = SETTINGS.sleep,
 ) -> None:
     LOGGER.info("Backing up '%s' to '%s'...", path, repo)
     if chmod:
@@ -121,7 +124,15 @@ def backup(
             repack_uncompressed=repack_uncompressed,
             tag=tag_forget,
         )
-    LOGGER.info("Finished backing up '%s' to '%s'", path, repo)
+    if sleep is None:
+        LOGGER.info("Finished backing up '%s' to '%s'", path, repo)
+    else:
+        delta = TimeDelta(seconds=sleep)
+        LOGGER.info(
+            "Finished backing up '%s' to '%s'; sleeping for %s...", path, repo, delta
+        )
+        time.sleep(sleep)
+        LOGGER.info("Finishing sleeping for %s", delta)
 
 
 def _backup_core(

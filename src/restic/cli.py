@@ -79,6 +79,7 @@ def backup_sub_cmd(
         repack_small=settings.repack_small,
         repack_uncompressed=settings.repack_uncompressed,
         tag_forget=settings.tag_forget,
+        sleep=settings.sleep,
     )
 
 
