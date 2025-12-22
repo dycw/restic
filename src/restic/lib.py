@@ -158,6 +158,26 @@ def init(repo: Repo, /, *, password: PasswordLike = SETTINGS.password) -> None:
     LOGGER.info("Finished initializing '%s'", repo)
 
 
+def copy(
+    src: Repo,
+    dest: Repo,
+    /,
+    *,
+    src_password: PasswordLike = SETTINGS.password,
+    dest_password: PasswordLike = SETTINGS.password,
+    tag: list[str] | None = SETTINGS.tag_copy,
+) -> None:
+    LOGGER.info("Copying snapshots from '%s' to '%s'...", src, dest)
+    with (
+        yield_repo_env(src, env_var="RESTIC_FROM_REPOSITORY"),
+        yield_repo_env(dest),
+        yield_password(password=src_password, env_var="RESTIC_FROM_PASSWORD_FILE"),
+        yield_password(password=dest_password),
+    ):
+        run("restic", "copy", *expand_tag(tag=tag), print=True)
+    LOGGER.info("Finished copying snapshots from '%s' to '%s'", src, dest)
+
+
 def forget(
     repo: Repo,
     /,
@@ -255,4 +275,4 @@ def snapshots(repo: Repo, /, *, password: PasswordLike = SETTINGS.password) -> N
     LOGGER.info("Finished listing snapshots in '%s'", repo)
 
 
-__all__ = ["backup", "forget", "init", "restore", "snapshots"]
+__all__ = ["backup", "copy", "forget", "init", "restore", "snapshots"]
