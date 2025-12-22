@@ -17,6 +17,8 @@ from typed_settings import (
 )
 from utilities.os import CPU_COUNT
 
+from restic.logging import LOGGER
+
 CONFIG_FILE = getenv("RESTIC_CONFIG_FILE", "config.toml")
 SECRETS_FILE = getenv("RESTIC_SECRETS_FILE", "secrets.toml")
 LOADERS = [
@@ -137,6 +139,7 @@ class Settings:
     snapshot: str = option(default="latest", help="Snapshot ID to restore")
 
 
+LOGGER.info("Loading settings from '%s' and '%s'...", CONFIG_FILE, SECRETS_FILE)
 SETTINGS = load_settings(Settings, LOADERS)
 
 
