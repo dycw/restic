@@ -89,20 +89,22 @@ class SFTP:
 
 
 @contextmanager
-def yield_repo_env(repo: Repo, /) -> Iterator[None]:
+def yield_repo_env(
+    repo: Repo, /, *, env_var: str = "RESTIC_REPOSITORY"
+) -> Iterator[None]:
     match repo:
         case Backblaze():
             with temp_environ(
+                {env_var: repo.repository},
                 B2_ACCOUNT_ID=repo.key_id.get_secret_value(),
                 B2_ACCOUNT_KEY=repo.application_key.get_secret_value(),
-                RESTIC_REPOSITORY=repo.repository,
             ):
                 yield
         case SFTP():
-            with temp_environ(RESTIC_REPOSITORY=repo.repository):
+            with temp_environ({env_var: repo.repository}):
                 yield
         case Path() | str():
-            with temp_environ(RESTIC_REPOSITORY=str(repo)):
+            with temp_environ({env_var: str(repo)}):
                 yield
         case never:
             assert_never(never)

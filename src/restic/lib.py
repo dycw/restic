@@ -168,30 +168,13 @@ def copy(
     tag: list[str] | None = SETTINGS.tag_copy,
 ) -> None:
     LOGGER.info("Copying snapshots from '%s' to '%s'...", src, dest)
-    with yield_repo_env(src), yield_password(password=dest_password):
-        run(
-            "restic",
-            "copy",
-            *expand_dry_run(dry_run=dry_run),
-            *expand_keep("last", n=keep_last),
-            *expand_keep("hourly", n=keep_hourly),
-            *expand_keep("daily", n=keep_daily),
-            *expand_keep("weekly", n=keep_weekly),
-            *expand_keep("monthly", n=keep_monthly),
-            *expand_keep("yearly", n=keep_yearly),
-            *expand_keep_within("within", duration=keep_within),
-            *expand_keep_within("within-hourly", duration=keep_within_hourly),
-            *expand_keep_within("within-daily", duration=keep_within_daily),
-            *expand_keep_within("within-weekly", duration=keep_within_weekly),
-            *expand_keep_within("within-monthly", duration=keep_within_monthly),
-            *expand_keep_within("within-yearly", duration=keep_within_yearly),
-            *expand_bool("prune", bool_=prune),
-            *expand_bool("repack-cacheable-only", bool_=repack_cacheable_only),
-            *expand_bool("repack-small", bool_=repack_small),
-            *expand_bool("repack-uncompressed", bool_=repack_uncompressed),
-            *expand_tag(tag=tag),
-            print=True,
-        )
+    with (
+        yield_repo_env(src, env_var="RESTIC_FROM_REPOSITORY"),
+        yield_repo_env(dest),
+        yield_password(password=src_password, env_var="RESTIC_FROM_PASSWORD_FILE"),
+        yield_password(password=dest_password),
+    ):
+        run("restic", "copy", *expand_tag(tag=tag), print=True)
     LOGGER.info("Finished copying snapshots from '%s' to '%s'", src, dest)
 
 

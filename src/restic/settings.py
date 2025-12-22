@@ -54,6 +54,10 @@ class Settings:
     run_forget: bool = option(
         default=True, help="Automatically run the 'forget' command"
     )
+    # copy
+    tag_copy: list[str] | None = option(
+        default=None, help="Only consider snapshots including `tag[,tag,...]`"
+    )
     # forget
     keep_last: int | None = option(default=None, help="Keep the last n snapshots")
     keep_hourly: int | None = option(
@@ -225,6 +229,19 @@ class BackupSettings:
 
 
 @settings(kw_only=True)
+class CopySettings:
+    src_password: Secret[str] = secret(
+        default=SETTINGS.password, help=_get_help(Settings.password)
+    )
+    dest_password: Secret[str] = secret(
+        default=SETTINGS.password, help=_get_help(Settings.password)
+    )
+    tag: list[str] | None = option(
+        default=SETTINGS.tag_copy, help=_get_help(Settings.tag_copy)
+    )
+
+
+@settings(kw_only=True)
 class ForgetSettings:
     password: Secret[str] = secret(
         default=SETTINGS.password, help=_get_help(Settings.password)
@@ -320,6 +337,7 @@ __all__ = [
     "LOADERS",
     "SETTINGS",
     "BackupSettings",
+    "CopySettings",
     "ForgetSettings",
     "InitSettings",
     "RestoreSettings",
