@@ -23,10 +23,13 @@ class Repo(ParamType):
 
     @override
     def convert(
-        self, value: restic.repo.Repo, param: Parameter | None, ctx: Context | None
+        self,
+        value: restic.repo.Repo | str,
+        param: Parameter | None,
+        ctx: Context | None,
     ) -> restic.repo.Repo:
         match value:
-            case Backblaze() | Local() | SFTP() | Path():
+            case Backblaze() | Local() | SFTP():
                 return value
             case str():
                 try:
