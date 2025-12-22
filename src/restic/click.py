@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import suppress
+from pathlib import Path
 from re import search
 from typing import TYPE_CHECKING, assert_never, override
 
@@ -25,7 +26,7 @@ class Repo(ParamType):
         self, value: restic.repo.Repo, param: Parameter | None, ctx: Context | None
     ) -> restic.repo.Repo:
         match value:
-            case Backblaze() | SFTP():
+            case Backblaze() | SFTP() | Path():
                 return value
             case str():
                 with suppress(ValueError, ExtractGroupsError):
