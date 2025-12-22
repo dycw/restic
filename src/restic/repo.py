@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Self, assert_never
 from typed_settings import Secret, load_settings
 from utilities.os import temp_environ
 from utilities.re import extract_group, extract_groups
-from utilities.types import PathLike
 
 from restic.settings import LOADERS, SETTINGS, Settings
 
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
     from restic.types import SecretLike
 
 
-type Repo = Backblaze | Local | SFTP | PathLike
+type Repo = Backblaze | Local | SFTP
 
 
 @dataclass(order=True, unsafe_hash=True, slots=True)
@@ -116,9 +115,6 @@ def yield_repo_env(
                 yield
         case Local() | SFTP():
             with temp_environ({env_var: repo.repository}):
-                yield
-        case Path() | str():
-            with temp_environ({env_var: str(repo)}):
                 yield
         case never:
             assert_never(never)

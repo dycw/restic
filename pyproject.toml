@@ -16,7 +16,7 @@
   name = "dycw-restic"
   readme = "README.md"
   requires-python = ">= 3.14"
-  version = "0.2.17"
+  version = "0.2.18"
 
   [project.scripts]
     py-restic = "restic.cli:_main"
