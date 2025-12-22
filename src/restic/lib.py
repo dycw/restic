@@ -147,13 +147,14 @@ def _backup_core(
             str(read_concurrency),
             *expand_tag(tag=tag),
             str(path),
+            print=True,
         )
 
 
 def init(repo: Repo, /, *, password: PasswordLike = SETTINGS.password) -> None:
     LOGGER.info("Initializing '%s'", repo)
     with yield_repo_env(repo), yield_password(password=password):
-        run("restic", "init")
+        run("restic", "init", print=True)
     LOGGER.info("Finished initializing '%s'", repo)
 
 
@@ -204,6 +205,7 @@ def forget(
             *expand_bool("repack-small", bool_=repack_small),
             *expand_bool("repack-uncompressed", bool_=repack_uncompressed),
             *expand_tag(tag=tag),
+            print=True,
         )
     LOGGER.info("Finished forgetting snapshots in '%s'", repo)
 
@@ -239,6 +241,7 @@ def restore(
             str(target),
             "--verify",
             snapshot,
+            print=True,
         )
     LOGGER.info(
         "Finished restoring snapshot '%s' of '%s' to '%s'", snapshot, repo, target
@@ -248,7 +251,7 @@ def restore(
 def snapshots(repo: Repo, /, *, password: PasswordLike = SETTINGS.password) -> None:
     LOGGER.info("Listing snapshots in '%s'...", repo)
     with yield_repo_env(repo), yield_password(password=password):
-        run("restic", "snapshots")
+        run("restic", "snapshots", print=True)
     LOGGER.info("Finished listing snapshots in '%s'", repo)
 
 
