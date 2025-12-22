@@ -29,14 +29,15 @@ class Repo(ParamType):
             case Backblaze() | SFTP() | Path():
                 return value
             case str():
-                with suppress(ValueError, ExtractGroupsError):
+                try:
                     return Backblaze.parse(value)
+                except ValueError, ExtractGroupsError:
+                    if search("b2", value):
+                        message = f"For a Backblaze repository {value!r}, the environment varaibles 'BACKBLAZE_KEY_ID' and 'BACKBLAZE_APPLICATION_KEY' must be defined"
+                        return self.fail(message, param, ctx)
                 with suppress(ExtractGroupsError):
                     return SFTP.parse(value)
-                message = repr(value)
-                if search("b2", value):
-                    message = f"{message}. For a 'b2' backend, the environment varaibles 'BACKBLAZE_KEY_ID' and 'BACKBLAZE_APPLICATION_KEY' must be defined"
-                return self.fail(message, param, ctx)
+                return value
             case never:
                 assert_never(never)
 
