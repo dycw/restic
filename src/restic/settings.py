@@ -245,6 +245,7 @@ class CopySettings:
     tag: list[str] | None = option(
         default=SETTINGS.tag_copy, help=_get_help(Settings.tag_copy)
     )
+    sleep: int | None = option(default=SETTINGS.sleep, help=_get_help(Settings.sleep))
 
 
 @settings(kw_only=True)

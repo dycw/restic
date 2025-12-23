@@ -177,6 +177,7 @@ def copy(
     src_password: PasswordLike = SETTINGS.password,
     dest_password: PasswordLike = SETTINGS.password,
     tag: list[str] | None = SETTINGS.tag_copy,
+    sleep: int | None = SETTINGS.sleep,
 ) -> None:
     LOGGER.info("Copying snapshots from '%s' to '%s'...", src, dest)
     with (
@@ -186,7 +187,15 @@ def copy(
         yield_password(password=dest_password),
     ):
         run("restic", "copy", *expand_tag(tag=tag), print=True)
-    LOGGER.info("Finished copying snapshots from '%s' to '%s'", src, dest)
+    if sleep is None:
+        LOGGER.info("Finished copying snapshots from '%s' to '%s'", src, dest)
+    else:
+        delta = TimeDelta(seconds=sleep)
+        LOGGER.info(
+            "Finished copying snapshots from '%s' to '%s'; sleeping for %s...", delta
+        )
+        time.sleep(sleep)
+        LOGGER.info("Finishing sleeping for %s", delta)
 
 
 def forget(
