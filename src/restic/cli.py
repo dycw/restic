@@ -98,6 +98,7 @@ def copy_sub_cmd(
         src_password=settings.src_password,
         dest_password=settings.dest_password,
         tag=settings.tag,
+        sleep=settings.sleep,
     )
 
 
