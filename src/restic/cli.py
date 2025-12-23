@@ -38,6 +38,7 @@ def _main() -> None: ...
 def init_sub_cmd(settings: InitSettings, /, *, repo: restic.repo.Repo) -> None:
     if is_pytest():
         return
+    basic_config(obj=LOGGER)
     init(repo, password=settings.password)
 
 
@@ -50,6 +51,7 @@ def backup_sub_cmd(
 ) -> None:
     if is_pytest():
         return
+    basic_config(obj=LOGGER)
     backup(
         path,
         repo,
@@ -92,6 +94,7 @@ def copy_sub_cmd(
 ) -> None:
     if is_pytest():
         return
+    basic_config(obj=LOGGER)
     copy(
         src,
         dest,
@@ -108,6 +111,7 @@ def copy_sub_cmd(
 def forget_sub_cmd(settings: ForgetSettings, /, *, repo: restic.repo.Repo) -> None:
     if is_pytest():
         return
+    basic_config(obj=LOGGER)
     forget(
         repo,
         password=settings.password,
@@ -141,6 +145,7 @@ def restore_sub_cmd(
 ) -> None:
     if is_pytest():
         return
+    basic_config(obj=LOGGER)
     restore(
         repo,
         target,
@@ -164,9 +169,9 @@ def snapshots_sub_cmd(
 ) -> None:
     if is_pytest():
         return
+    basic_config(obj=LOGGER)
     snapshots(repo, password=settings.password)
 
 
 if __name__ == "__main__":
-    basic_config(obj=LOGGER)
     _main()
