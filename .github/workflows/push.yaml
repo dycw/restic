@@ -1,3 +1,8 @@
+name: push
+on:
+  push:
+    branches:
+      - master
 jobs:
   publish:
     environment:
@@ -17,8 +22,3 @@ jobs:
         uses: dycw/action-tag@latest
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-name: push
-"on":
-  push:
-    branches:
-      - master
