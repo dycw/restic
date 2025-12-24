@@ -32,7 +32,6 @@ repos:
           - --github--pull-request--pytest--os--windows
           - --github--pull-request--pytest--python-version--default
           - --github--pull-request--pytest--resolution--highest
-          - --github--pull-request--pytest--resolution--lowest-direct
           - --github--pull-request--ruff
           - --github--push--publish
           - --github--push--tag
