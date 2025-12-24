@@ -29,7 +29,6 @@ repos:
           - --github--pull-request--pyright
           - --github--pull-request--pytest--os--macos
           - --github--pull-request--pytest--os--ubuntu
-          - --github--pull-request--pytest--os--windows
           - --github--pull-request--pytest--python-version--default
           - --github--pull-request--pytest--resolution--highest
           - --github--pull-request--ruff
